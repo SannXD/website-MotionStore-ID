@@ -1058,7 +1058,7 @@
   }
   .proof-toast.show { opacity:1; transform:translateY(0); }
   .proof-toast .testi-avatar { width:28px; height:28px; font-size:0.7rem; }
-  .proof-toast-name { font-size:0.78rem; font-weight:700; margin-bottom:2px; }
+  .proof-toast-name { font-size:0.78rem; font-weight:700; margin-bottom:2px; display:flex; align-items:center; gap:5px; }
   .proof-toast-text { font-size:0.78rem; color:var(--muted); line-height:1.4; }
   @media (max-width:680px) {
     .proof-toast { left:14px; right:90px; max-width:none; bottom:18px; }
@@ -1506,19 +1506,19 @@
     </div>
   </div>
 
-  <!-- JOIN COMMUNITY BANNER -->
+  <!-- TESTIMONI BANNER -->
   <div id="joinCommunityBanner">
     <div class="jc-header">
       <div class="jc-title">
         <span class="jc-dot"></span>
-        Join Community
+        Channel Testimoni
       </div>
       <button class="jc-close" onclick="closeJoinCommunity()" aria-label="Tutup">✕</button>
     </div>
-    <div class="jc-desc">Gabung ke channel WhatsApp resmi MotionStore ID untuk update terbaru, fitur baru, dan info maintenance server.</div>
+    <div class="jc-desc">Ini testimoni asli dari pelanggan yang udah order di MotionStore ID, bisa kamu cek langsung di channel WhatsApp kami.</div>
     <div class="jc-btns">
-      <a class="jc-btn-wa" href="https://whatsapp.com/channel/0029Vb8NJtp8F2pGOhRdiS1B" target="_blank">
-        <span class="jc-btn-icon">📢</span> Follow Channel WhatsApp
+      <a class="jc-btn-wa" href="https://whatsapp.com/channel/0029Vb8NJtp8F2pGOhRdiS1B" target="_blank" onclick="closeJoinCommunity();">
+        <span class="jc-btn-icon">📢</span> Lihat di Channel WhatsApp
       </a>
     </div>
   </div>
@@ -2135,7 +2135,7 @@
     const d = getRandomProof();
     toast.innerHTML =
       '<div class="testi-avatar">' + d.initials + '</div>' +
-      '<div><div class="proof-toast-name">✓ ' + d.name + '</div>' +
+      '<div><div class="proof-toast-name"><span class="jc-dot"></span> ' + d.name + '</div>' +
       '<div class="proof-toast-text">' + d.text + '</div></div>';
     toast.classList.remove('show');
     void toast.offsetWidth; // Trigger reflow untuk reset animation
