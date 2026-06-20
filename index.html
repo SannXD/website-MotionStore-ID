@@ -1797,9 +1797,9 @@
   //  4. Ganti dua nilai di bawah ini, lalu upload ulang SEKALI
   //  5. Setelah itu edit berita kapan saja langsung dari web!
   //
-  const JSONBIN_ID  = 'ISI_BIN_ID_KAMU_DI_SINI';   // ← ganti
-  const JSONBIN_KEY = 'ISI_API_KEY_KAMU_DI_SINI';  // ← ganti
-  const ADMIN_PASS  = 'admin123';                   // ← ganti password admin
+  const JSONBIN_ID  = '6a36c099da38895dfee36fd5';
+  const JSONBIN_KEY = '$2a$10$gli6hqJIc0dCDs5s0vBTBuh/drrq7RPx4SQRa8cjRyq/Nntlh3tsi';
+  const ADMIN_PASS  = 'ganti-password-ini-123';     // ← WAJIB ganti sebelum publish
   //
   // ╚══════════════════════════════════════════════════════════════╝
 
@@ -2271,7 +2271,7 @@
     if (JSONBIN_ID === 'ISI_BIN_ID_KAMU_DI_SINI') return;
     try {
       const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Master-Key': JSONBIN_KEY }
+        headers: { 'X-Access-Key': JSONBIN_KEY }
       });
       const json = await res.json();
       const d = json.record;
@@ -2357,7 +2357,7 @@
     }
     try {
       const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Master-Key': JSONBIN_KEY }
+        headers: { 'X-Access-Key': JSONBIN_KEY }
       });
       const json = await res.json();
       const d = json.record || {};
@@ -2408,7 +2408,7 @@
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_KEY,
+          'X-Access-Key': JSONBIN_KEY,
         },
         body: JSON.stringify(data)
       });
