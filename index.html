@@ -1996,47 +1996,40 @@
     renderQris(uniqueNominal);
     startTimer();
   }
-
   // ════════════════════════════════════════════════
-  //  STOK AM (versi sementara, per-browser pakai localStorage)
+  //  STOK AM (sinkron semua orang, via Supabase)
   // ════════════════════════════════════════════════
-  const AM_STOCK_KEY = 'amSellerStock';
-  const AM_STOCK_START = 18;
-
-  function getAmStock(){
-    const v = localStorage.getItem(AM_STOCK_KEY);
-    if (v === null) return AM_STOCK_START;
-    return Math.max(0, parseInt(v, 10));
+  async function fetchAmStock(){
+    try {
+      const res = await fetch('/.netlify/functions/stock');
+      const data = await res.json();
+      renderAmStock(data.remaining);
+    } catch(e) {
+      // kalau gagal fetch, biarkan teks default tampil
+    }
   }
 
-  function renderAmStock(){
-    const stok = getAmStock();
+  async function reduceAmStock(){
+    try {
+      const res = await fetch('/.netlify/functions/stock', { method: 'POST' });
+      const data = await res.json();
+      renderAmStock(data.remaining);
+    } catch(e) {}
+  }
+
+  function renderAmStock(remaining){
     const el = document.getElementById('amSellerStockText');
-    if (!el) return;
-    if (stok <= 0){
+    if (!el || remaining === undefined) return;
+    if (remaining <= 0){
       el.textContent = '❌ Stok habis';
       const sellerOpt = document.getElementById('accpick-seller');
       if (sellerOpt) sellerOpt.classList.add('disabled');
     } else {
-      el.textContent = '🔥 Stok ' + stok + ' akun';
+      el.textContent = '🔥 Stok ' + remaining + ' akun';
     }
   }
 
-  function reduceAmStock(){
-    const stok = getAmStock();
-    if (stok > 0){
-      localStorage.setItem(AM_STOCK_KEY, String(stok - 1));
-    }
-    renderAmStock();
-  }
-
-  document.addEventListener('DOMContentLoaded', function(){
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('resetstock') === '1'){
-      localStorage.removeItem(AM_STOCK_KEY);
-    }
-    renderAmStock();
-  });
+  document.addEventListener('DOMContentLoaded', fetchAmStock);
 
   function confirmPaid(){
     if (currentOrder.type === 'am' && selectedAccType === 'seller'){
@@ -2207,7 +2200,7 @@
   function openAccPick(){
     accpickSelected = selectedAccType;
     _renderAccPick();
-    renderAmStock();
+    fetchAmStock();
     const overlay = document.getElementById('accpickOverlay');
     overlay.style.display = 'flex';
     // small rAF so browser registers display:flex before transition fires
