@@ -4,7 +4,6 @@ exports.handler = async function (event) {
 
   const headers = {
     apikey: SUPABASE_SECRET_KEY,
-    Authorization: 'Bearer ' + SUPABASE_SECRET_KEY,
     'Content-Type': 'application/json',
     Prefer: 'return=representation',
   };
@@ -20,7 +19,6 @@ exports.handler = async function (event) {
   }
 
   try {
-    // Ambil stok saat ini
     if (event.httpMethod === 'GET') {
       const res = await fetch(
         SUPABASE_URL + '/rest/v1/stock?id=eq.1&select=remaining',
@@ -35,7 +33,6 @@ exports.handler = async function (event) {
       };
     }
 
-    // Kurangi stok -1 (dipanggil pas pembeli klik "Sudah Bayar")
     if (event.httpMethod === 'POST') {
       const getRes = await fetch(
         SUPABASE_URL + '/rest/v1/stock?id=eq.1&select=remaining',
