@@ -1798,7 +1798,8 @@
   //  5. Setelah itu edit berita kapan saja langsung dari web!
   //
   const JSONBIN_ID  = '6a36c099da38895dfee36fd5';
-  const JSONBIN_KEY = '$2a$10$gli6hqJIc0dCDs5s0vBTBuh/drrq7RPx4SQRa8cjRyq/Nntlh3tsi';
+  const JSONBIN_KEY = '$2a$10$gli6hqJIc0dCDs5s0vBTBuh/drrq7RPx4SQRa8cjRyq/Nntlh3tsi';   // Access Key (read-only) — dipakai untuk TAMPILKAN popup
+  const JSONBIN_MASTER_KEY = '$2a$10$x0Htrrp0A2saMdZIklxrV.gsIep2bRScCw08EvfYAZMOW1xbFzG9G';   // Master Key — dipakai HANYA di panel admin (?manage) untuk SIMPAN data
   const ADMIN_PASS  = 'ganti-password-ini-123';     // ← WAJIB ganti sebelum publish
   //
   // ╚══════════════════════════════════════════════════════════════╝
@@ -2357,7 +2358,7 @@
     }
     try {
       const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Access-Key': JSONBIN_KEY }
+        headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
       });
       const json = await res.json();
       const d = json.record || {};
@@ -2408,7 +2409,7 @@
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Access-Key': JSONBIN_KEY,
+          'X-Master-Key': JSONBIN_MASTER_KEY,
         },
         body: JSON.stringify(data)
       });
