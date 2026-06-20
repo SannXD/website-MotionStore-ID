@@ -802,6 +802,8 @@
     cursor:pointer; transition:border-color .2s, background .2s;
   }
   .ap-type.sel { border-color:#7c5cfc; background:rgba(124,92,252,0.08); }
+  .ap-type.disabled { opacity:0.5; pointer-events:none; filter:grayscale(0.5); }
+  .ap-type.disabled .ap-type-tag.pink { background:rgba(255,255,255,0.12); color:var(--muted); }
   .ap-type-row {
     display:flex; align-items:center; justify-content:space-between; margin-bottom:9px;
   }
@@ -1673,22 +1675,23 @@
           <div class="ap-type-perk">Akun pakai email toko kami, tidak perlu daftar</div>
           <div class="ap-type-perk">Aktivasi lebih cepat &amp; mudah</div>
           <div class="ap-type-perk">Harga paling hemat, cocok untuk pengguna baru</div>
+          <div class="ap-type-perk" style="color:#ff6b6b;font-weight:700;" id="amSellerStockText">🔥 Stok 18 akun</div>
         </div>
       </div>
 
-      <div class="ap-type" id="accpick-buyer" onclick="pickAccType('buyer')">
+      <div class="ap-type disabled" id="accpick-buyer">
         <div class="ap-type-row">
           <div class="ap-type-left">
             <div class="ap-type-dot"></div>
             <span class="ap-type-name">🔑 Email dari Buyer</span>
-            <span class="ap-type-tag pink">Full Kontrol</span>
+            <span class="ap-type-tag pink">Tutup Sementara</span>
           </div>
           <div class="ap-type-price">Rp4.000</div>
         </div>
         <div class="ap-type-perks">
           <div class="ap-type-perk">Akun didaftarkan pakai email kamu sendiri</div>
           <div class="ap-type-perk">Kamu pegang penuh kendali &amp; password</div>
-          <div class="ap-type-perk">Lebih aman &amp; fleksibel untuk jangka panjang</div>
+          <div class="ap-type-perk">Belum tersedia saat ini, coba lagi nanti ya</div>
         </div>
       </div>
 
@@ -1994,7 +1997,51 @@
     startTimer();
   }
 
+  // ════════════════════════════════════════════════
+  //  STOK AM (versi sementara, per-browser pakai localStorage)
+  // ════════════════════════════════════════════════
+  const AM_STOCK_KEY = 'amSellerStock';
+  const AM_STOCK_START = 18;
+
+  function getAmStock(){
+    const v = localStorage.getItem(AM_STOCK_KEY);
+    if (v === null) return AM_STOCK_START;
+    return Math.max(0, parseInt(v, 10));
+  }
+
+  function renderAmStock(){
+    const stok = getAmStock();
+    const el = document.getElementById('amSellerStockText');
+    if (!el) return;
+    if (stok <= 0){
+      el.textContent = '❌ Stok habis';
+      const sellerOpt = document.getElementById('accpick-seller');
+      if (sellerOpt) sellerOpt.classList.add('disabled');
+    } else {
+      el.textContent = '🔥 Stok ' + stok + ' akun';
+    }
+  }
+
+  function reduceAmStock(){
+    const stok = getAmStock();
+    if (stok > 0){
+      localStorage.setItem(AM_STOCK_KEY, String(stok - 1));
+    }
+    renderAmStock();
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('resetstock') === '1'){
+      localStorage.removeItem(AM_STOCK_KEY);
+    }
+    renderAmStock();
+  });
+
   function confirmPaid(){
+    if (currentOrder.type === 'am' && selectedAccType === 'seller'){
+      reduceAmStock();
+    }
     const name = document.getElementById('custName').value.trim();
     const wa = document.getElementById('custWA').value.trim();
     const garis = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
@@ -2160,6 +2207,7 @@
   function openAccPick(){
     accpickSelected = selectedAccType;
     _renderAccPick();
+    renderAmStock();
     const overlay = document.getElementById('accpickOverlay');
     overlay.style.display = 'flex';
     // small rAF so browser registers display:flex before transition fires
