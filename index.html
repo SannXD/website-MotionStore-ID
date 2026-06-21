@@ -395,9 +395,20 @@
   /* ════════════════════════════════
      PRODUCT CARD
   ════════════════════════════════ */
-  .product-wrap { max-width:420px; margin:0 auto; padding:0 24px 60px; animation:fadeSlideUp 0.7s 0.5s ease both; }
+  .product-wrap { max-width:320px; margin:0 auto; padding:0 24px 60px; animation:fadeSlideUp 0.7s 0.5s ease both; }
+  .product-row {
+    display:flex; align-items:flex-start; gap:14px; overflow-x:auto;
+    padding:0 24px 50px; margin:0;
+    scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+    animation:fadeSlideUp 0.7s 0.5s ease both;
+  }
+  .product-row::-webkit-scrollbar { height:5px; }
+  .product-row::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  .product-row .product-card {
+    flex:0 0 200px; width:200px; scroll-snap-align:start;
+  }
   .product-card {
-    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
     overflow:hidden; transition:border-color .35s, box-shadow .35s, transform .35s;
   }
   .product-card:hover { border-color:var(--accent); box-shadow:0 0 40px var(--glow); transform:translateY(-4px); }
@@ -501,7 +512,7 @@
 
   .product-header {
     background:linear-gradient(135deg,#1a1030 0%,#0f0f1a 100%);
-    padding:36px 24px; text-align:center; position:relative; overflow:hidden;
+    padding:22px 18px; text-align:center; position:relative; overflow:hidden;
   }
   .product-header::before {
     content:''; position:absolute; inset:0;
@@ -515,9 +526,9 @@
   @keyframes scanLine { 0%,100%{ top:-40%; } 50%{ top:130%; } }
 
   .app-icon {
-    width:90px; height:90px; border-radius:20px;
-    display:block; margin:0 auto 14px; position:relative; z-index:1;
-    object-fit:contain; background:#fff; padding:6px;
+    width:60px; height:60px; border-radius:16px;
+    display:block; margin:0 auto 10px; position:relative; z-index:1;
+    object-fit:contain; background:#fff; padding:5px;
     box-shadow:0 8px 32px rgba(124,92,252,0.4);
     animation:iconFloat 3s ease-in-out infinite;
   }
@@ -525,13 +536,13 @@
     0%,100% { transform:translateY(0) rotate(0deg); box-shadow:0 8px 32px rgba(124,92,252,0.4); }
     50%     { transform:translateY(-8px) rotate(2deg); box-shadow:0 20px 40px rgba(252,92,160,0.4); }
   }
-  .product-header h2 { font-family:'Sora',sans-serif; font-size:1.3rem; font-weight:800; position:relative; z-index:1; }
-  .product-header .sub { font-size:0.8rem; color:var(--muted); position:relative; z-index:1; margin-top:4px; }
+  .product-header h2 { font-family:'Sora',sans-serif; font-size:1.05rem; font-weight:800; position:relative; z-index:1; }
+  .product-header .sub { font-size:0.72rem; color:var(--muted); position:relative; z-index:1; margin-top:4px; }
 
-  .product-body { padding:24px; }
-  .features { list-style:none; margin-bottom:24px; display:flex; flex-direction:column; gap:10px; }
+  .product-body { padding:18px; }
+  .features { list-style:none; margin-bottom:16px; display:flex; flex-direction:column; gap:7px; }
   .features li {
-    display:flex; align-items:center; gap:10px; font-size:0.88rem; color:#c4b8ff;
+    display:flex; align-items:center; gap:8px; font-size:0.78rem; color:#c4b8ff;
     opacity:0; animation:featIn 0.4s ease forwards;
   }
   .features li:nth-child(1){animation-delay:0.6s}
@@ -546,9 +557,9 @@
   }
   .features li::before { content:'✦'; color:var(--accent); font-size:0.7rem; flex-shrink:0; }
 
-  .price-row { display:flex; align-items:flex-end; gap:10px; margin-bottom:20px; }
+  .price-row { display:flex; align-items:flex-end; gap:8px; margin-bottom:14px; }
   .price {
-    font-family:'Sora',sans-serif; font-size:2.2rem; font-weight:900;
+    font-family:'Sora',sans-serif; font-size:1.6rem; font-weight:900;
     background:linear-gradient(90deg,#7c5cfc,#fc5ca0);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     animation:pricePop 0.6s 1.2s cubic-bezier(.34,1.56,.64,1) both;
@@ -557,11 +568,11 @@
     from { opacity:0; transform:scale(0.7); }
     to   { opacity:1; transform:scale(1); }
   }
-  .price-period { color:var(--muted); font-size:0.85rem; margin-bottom:6px; }
+  .price-period { color:var(--muted); font-size:0.76rem; margin-bottom:4px; }
 
   .buy-btn {
     width:100%; background:linear-gradient(90deg,#7c5cfc,#a05cfc); color:#fff;
-    border:none; padding:15px; border-radius:12px; font-size:1rem; font-weight:700;
+    border:none; padding:12px; border-radius:10px; font-size:0.88rem; font-weight:700;
     cursor:pointer; font-family:inherit; letter-spacing:0.3px;
     transition:opacity .2s, transform .2s, box-shadow .2s;
     position:relative; overflow:hidden;
@@ -576,8 +587,8 @@
   .buy-btn:hover { opacity:0.9; transform:translateY(-2px); box-shadow:0 8px 24px rgba(124,92,252,0.4); }
   .buy-btn:active { transform:translateY(0); }
 
-  .trust { display:flex; gap:12px; justify-content:center; margin-top:16px; flex-wrap:wrap; }
-  .trust span { font-size:0.75rem; color:var(--muted); display:flex; align-items:center; gap:4px; }
+  .trust { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+  .trust span { font-size:0.68rem; color:var(--muted); display:flex; align-items:center; gap:4px; }
 
   /* ════════════════════════════════
      MODAL
@@ -1358,15 +1369,15 @@
       </div>
     </section>
 
-    <div class="product-wrap">
-      <div class="product-card">
-        <div class="product-header">
-          <div class="app-icon"><img src="data:image/png;base64,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" style="width:72px;height:72px;border-radius:18px;object-fit:contain;"></div>
+    <div class="product-row" id="productsRow">
+      <div class="product-card" id="mainProductCard">
+        <div class="product-header" style="cursor:pointer;" onclick="openProductDetailAM()">
+          <div class="app-icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAA21BMVEUeIjkdIjkA/6gdJDocJTscJjodJTscJzoA/7IA/6cA/7AA/6oA/7EA/6wA/64cJDsgACsgAC4eHzgfFzUfEzQeHDcgACkfEDMA/7YhACUfFDQcIDkfACUdHTgfGTYdACoA9q8fCjIdOEAdADEcREUZaVgA86IhACIWg2UG7KIG4KAdP0MA7KgcS0gaYVYRqIEbU00K05geKzoPrXwB2JUWdl8cMkATlHIOuYgbND4Mxo4PsIMSo3sXfmYYcFsMx48Vi2wNv4UVZVoJyYsaWFASoHQMt4IF3ZYUj2vgo657AAAVlElEQVR4nO2dCXuiyhKGRSAgKKFBIEpEicvEddTEaKJGs0wy//8XXZZuaDajxhyc+/DdJ3Ny3aZfq7qrqrfJ5X5ExF4iccU+GJb/gsiH/QzINwmJcOO/JMQhU0XcE/AoQtJ7VZqI+xLGIZIUJveZi4uLvcx4hoCRnmj9SYVE0xR14SrKmBbi/oQhIzr/8UznyAak4hnTQzwAMGxGS5eXgf/rGzPESMR66jkSBhkvbcUThhnRW1NAPJQQZ7wMI4Z6ZZgxFcTDAQ9BdCHTRTyGMMK4gzDEGEE8V0IM8kDEFBiPRkxgjEHEGN23BT/nfAk9xr0QPcII4k8TfgsRZ9yJSO2y4nkjxjFiYDTMchzGxL545oiEhxhjRdpR0IxExIo/TngyxKgVaRpj/IcRo4xhwn8fkTgU8T/viieADPXGCCJiTMuIO8jd/x2A6JaMEUIckTwrxICi336AEYej/1FEGzIR0UHAzRdCpHc4atpYuHb4KUQkffNFCamE0SZtLEw7e2IEkQ4g0sl+mjYWrh2AXyL+G366k9Cdf7u8jIwzESuGEdPGwrWbEIaNJETciv+YEX06DNGlYph9ENPGCmgXIUxsECIVj+iNNudpxHgr+gk4jkjFIp69n+4wIpxihGyIkcERQ1HxPAnjEKOETl5DxyKef09MREReGkjd9kRMmymorwgDqZv1XyaEeP6EOxG99IbyOh4TRqSiiGkjhbUXoT8bFSX0EM+VMIYxQBhC3MNP0+aJUZIRSTLkpwgxakQCM+J/1WxdqhlyWXNULstKTdcPQaRJf/U7iPilEX+ajMzpiglEscncDEfPs9na0ux5NLyhrQeBpugkuQ8hQvSrKIQUTG1ieuKP4uk1TVXN4e1qcd9tsIIjzv2z0ejeL1brVrMiarWIOeP8FHXBGD+l4434w4S6oong5nbRK7FCiefzUfGlEseWeovZgyhWa18TopSU2s+IyE1/iM8AoL/eNFjWQisUEFIcZ77EsoOX5xsAlERGWD9RvmgcMdGI5A8RkhIQh/OewJZsOF4ospzADgY9R4NBQ+BYy6xhyt68r5q63yljAoaPyND+RAYVLjJ+mlCvVnLzHifYNitecYPN3bY97D/kZM0EwNRkaWoNOeu7p55wxeKY1jfRm5uq4fXJHYSIzEeMM+LPENZM8LxhLbwSV+wuti1QUYFpxQZJt5WzfiSppshaU6yAx9myVyyWMNfl2MW7qCFGMoKIeWlwTnFXwDgtnzjdDqyuJ3CDxfpBVE0lOehZA21ZVOX2716R8yF5trc2gOQShhAvw4iY4UJG/CFCSWSWDS4vsL3V2LRiQC4a6aLvqQKxv51wRd+QxcG8CnRnHny3EXHEHW56Oj6gLLkSzzZ+98WmscN2ESmmZfrelW9IoTEXzZiIgRuRxsWEEC9g6ub8cSpAs7qyBkhu81wB0QD+pSSzMlwWBb9DNrZiOY6QjDUiE+ClveT0hISGuB5wQmM5VMtHfgKpiMx8wHqMbK+t1nYFjIAVmThCmNecgk8XWxOOY1dT0fjOx0hAm/mMPLt5AF8ZkUkg9I14EsKquOL44soEta9f+wWjps4GnM+4VY1kQspJZ6LRIuym3wcE7598acGIh/e+OGmVeQP1xwLba4EQYnBTBmWjUUluehrCmvink58MxW/bzxOYLjFX3f7Sd7jpbkLXTb/ZHC133+msv9f/wqqJw4EXH9lNXQ4S4rkbRSH/ZH6IELS7nRdg7v8GJ3f7UsavOYvCY6kxBolumkAYcNPj6ewx9G/nc6bu0WRdMqqaaWrlqmz/0rRy8KqV0SX/7eKwx6Gii71VkzsiQvwRwhq4675MzS/cQJdkTab778+389Xvu8XHy8fHx92flVVwkEAESckPaYi/WW/AWV7rcW6KjMhERtPTECrGU/evKO3GU2Sy316vt+vn1/fx0NJ49Hy7+tjcf352P+9f/o411YylJHJq20PkNnXJD/pBQmpHR/weoTyd3L+DXe+XFPJx/Pr6/ljTTK1qGEqtVlMMo2xatpNbs7u3z26H70z+jDUgRwkJwmR6guupBWEgK3C2LeymdJyb4sn3sYDl/tvTjZb8dl3JPQ6HfcaQoxUUaU/AaQBMn+8+O50O/7kciUAKfpbtlUp9U4SdsTR4lOF8Ipqn8apE6KY4JIUqqOMJq/23j3JyjNCVad+q6xVp5ygklYH2ftct8bzQm0sqPk/jDi2S+puFiPzgRkaEVIQwjEhhNeJxgPLN2x+Q3AX16c2DtJsOvdIA4ujNqvMF9qkl+s6Konzl9goF/8aDgQhpH9FZY/OTN+ZEhBbgFiQB6LnpA7OruI98mnrz28rU+KvJuyiTQUJCXbNRRG8fNDIifWJC5eHlFiQ9qTPTi90DbERkTaRXDaHAs5NxRQoSEuKzhziYSsiIdCwhGnWobxJKxkcyIMkclSZJQFpd8RbjIgeChARoX6HhpqfCqe+AEXcRHjXS6OZynQhIH50GSiKzYfMF/mpud0e8LgSeFYXJtZt60wiRwWdrUOSgEOGR8RDMt0mABPmdEqpWeR0IhUKxNxaDk6Ui6ouF4lKlLjFCG8l3U/gbNO/RhOZsngT4rSTXllZesHbJNP8lBYp7dQ6DRoHdAkjo7cYIEPpnMY4mlMcr7ShDEWHlYhxaUtv2nBs3mWqByvd6icop9l3GCV0jnpJQmq7oA0fKWDxEGXmZlptYJT5/1RZJH5Akf03QCkCDJIKETCwhSaGV4AObas77R1S7SYBxqqlL2yXZ+bVPSJO6NIAFY2lyjYyIhk/fTT1C0iU8fBbDfH4/eLrwEDzHrurWCg8FduGWTHBprTpEo43VFemvCO2YgvaaHtRYpTU7oJ4/DtCS2L6yS6aJiEomW8AbUNmxgs8HYwEDEroLxscQ6rn1wX0wFsGdxkwkJMGItUumnlnDVrivn+AcHN8zA4S2Ef1NROgsP3XMnHf1ta98/aqvAe01lwuavtD1pH2z4J11chij5q9XEFoDDjbFeTO87uQTIptTaOP+Aa2Vbl6rpwF0RT88MDU9/jnz/cpBrOv+ikzVK/rZR50OTnj7WQAiPGZ1TW6fFJAgdH3av7lQYl9mjlwr1glvtYKsL5CfTlQ6OvmEE1rvQWcv9m+uMb45tBcm+CD8q+2/XWFawwc5bjebNbJYQUPYXHtraiQhIT9ln6vY3JO3V/ESEnp7xIhDCHXm/dBImAAXEFGjhyOmGvNF1FdFe0Rdqt42E1KbIT8daJS/F8onvCSDVxYcRKgMmUOztT0A7VYoZPu1qkQRrzclN/yhiQuS/tWDcZ+bmxgh6oMhQOgne0qftr47jmJQIdhyazvUCPxpF9HJY9xM1M3EdBT38w2JxghRH3TOnYQ+Z9/mKsMD+cKEodYHH64p61u5hhvWluHyNBQCEVJgAfNTbqXhhN4LqMj3tGdrdab/vWAfz+c9SWiju8cyGWQkwdwZUDfXXj0v9VGRUawHCC/RNGPkm9yztcrBsT4GMOSrwbZUHz7aZuBp6/frieOn26aHCJaeEc2ADUm4CB75Gvdrrc48HFwUxgJGBxoPU2E+tk0icAifrN04fsr2JUhIEw/IiA3Tr3w9whgv2a+10uPhVW+YcAcfxKE/VkDHdnRbbQbzolMx1Sk4nNCi1xNvyyckJA83YW434EWUkJSUpzuTwM5WWL9cD5xyYl1GU4fE4xVKwAHmpeQ3CadHTMEkEl4E5PFZrdSJtw+N8M7H2E2W3WSUrXsbvdQNjInFUe10hN8zIbEDEFLCNhrD+zsRrda7R/LqzmAjrJootNdeYUwsfQAv7UZOeiwhTR8MmEgYA3jhZ8za8+cf0clN3DqdpJARHwm0HVEboIAhkc5E/gkID87XcmEn3QWITY6RFPjT3Ta9oxX2j2vE0hIgQnMOSwx2LdsFMHWuhFZbfTqfUbzvjmS0wcv+MVyvLN7AOTZaR1HfLaKcg2yJ3XC/xl4cM1W/mxDOPzBYyoW64rj7KRGwJnRm8J3hNC8svcIeTOBYwyqkHyziTLhnW/WLY6aA4wl9A3onQUKIFLjrvKj4VtLyrdsTtUtIqP2FO8O4bRntYnPXv8lj+HLHztbvIgyeHMQIrR+C7nZmmpumOX9eyo5XsnMNvT6H3HQjumv2gZsGiVNshTqMkIgQMsHd9Ujub815p0sTlL+G1nTTmIEKX8+oPZS5KXFnSA4y36kIQ4iRLa8Udqjw0ux07gC2SGiMXCO+uxGeoc0/cDTl2kpov2yahP5Ig3BwQvw3c84LLd0zLk0ZzlhTWgBISLRg0BdWZmjPc3qEpG9D32IeVvA3qinknwAkdAZP100bCnqhCYM+fw8ip4BSIQy4KepzPqBvPvgr+ODZFuGb1pg5gyf3bNBungbeYLxoMETMwdgUrqLFjEhiAws0G1qa9phrY660qOOnDYpuItqE22bKcxgviu+1FE83xxuRCsntWTifPdb08sUpiR5gmPrE4RnI8OXSOyLcllNz0rgS2Ms1qZAdGbxfWo+ClSDMTZ+w6c5dcENnNp+hyQc4N1x6AWkeUI8zYuDSLi9CPIQGVuWVyw+AB8goboFR/Ft2OyKFhpr8RIwGw5QuvYbfsbf4FQiBxE0OA7QeVxp5DoY/Z/nMYN0cBsBNbOAJzWU0oyZMj9DuLfgNwf5YSj0++Li20eobXliaPqHoeuVAhPmeX0FNc+mZMHbGNOY+S5uCHOaQhzr3JJirUr6HCK0f1S0nWJp0E77qrUtYuBrX0jNh/HHe8N0Bru1ywylFeXxWBHxm80Kf8Fy3+VJyeEY1l1AZeVVwOUUTJp1Yxq9igYPoZX+oIz6b4PKRLbAzw/NjzQ2Awh/TzdmJPsrb7poX6Zkwiohmo/D7dGDvs3JoZEBbzZI70wR3Hyju3jZ+IcKiUunAcLEQ04mFXyNCUBQ3jHUAkK5b4aB3DfdZUFaId202qcPnm5CQf1JTJkxcRKT8G9jsFhvrFoVXjddWFlOqe7m4PnSTmC6AM8OgiwKiSgYAz4CQ8LI3PCwq7baEVY3M9YbPsw9uHWwBEX13ZBGq8Evx5mp6asomTNyu4BM6SLWRPefiE9af+MLVe42ChTDx6BIWp+5aIi2ime+umLIJExn92Og0WRrfAdyG9QWfL96WUTe9fHC9lG3pkPAJEnbE9AETPRUGRsfvau8vgA4RWrEBHa7QpyyslhSXUF1AQgGcA2HCtgw89Cuvb82Ql9rz3NCTL3Vow+LIJaQ8wlLgKG1qgDGMWAZnt7g6u8cJaXuk8QjJSx32Q65tuN+KtxbcUc+FMGbnAk5ozj89QtsL7WjBL+pwfYbU4VjKPcvuW4yRu4O/tFDPBjAXvAcCz8ItpObHJ/Dr4ouLehcROtmPBOOha0PLqhfqwtnF0FD0MwKMu64EIl4qn/ci7fFdXFpZm+WlIgXzHgXmNNxIQVW0Oh+wjacpdtr7LAmREWvjzptKQzxLup1ZW/0QnTeUn72x1MkV7E8A1T4j1s4KMGZ/BqowzD/5O0D7i8LVWdGuJJroKzDh5Brbr116uzoIKbB3M204R2FCBEqAbmldxdb1gVUB57m/5qX7KlJ8KcGcRvfnJUNraWnDOQqPpghRbnNCSyJ9ifd8vsC2ZfSaa5iGCjHb384JMB6RIC9+9fhBFd/al2vYFX1fRxwqnD3s1hP4zgUwYa9buc1a5S7W9mqbc+bR0Ct1g8VrpaP3lPwHCrXLRdKtcrf4KmOPg6Ud4HvoUAlRfXYPPvELMYbunADjt2Sqv4X8wMQezckDVL5D4t/uQMPNARGnlGD0uJPA4bbZkaDNFgTYdBfZcLaxs389anUC5w5HRvgD0gM0APOgxZywiTRPtvcfNkR815tq73/OF4conOs0XLhn408v/Pd0lrThW6fTnUfvXAi3rvrYsHeQmlgQkBhnXBl4+9vLM7jUNFDDb08NUBl2bJWeKpGLa4Kt024GfJ4Ptlx0xhlrdPUegDsuS08xhGngWUVEZWID8nxpIkcOuwVgxg07tI/xgVQii26hhGyoy3Clid1qRFhp4FnSmwLvnmvlGyM1bEavdbI4tzeLFldi0ITuqr2BLjSRX2E35FrhQwup0NnSm9i9ZMtp+PoFp3Gkoo4nRedcTMD3lJa7pL3wsFFSmh9oufPgs7205xEWhMbcFIOXLFiNq1ZuFkVn1+FAxM81E+5AmmfHBoSQFGhCYQnOA8+WPLrK+xLY5VAEmlGzI6R9Z7Ip1tsT96IkfmAEbp4z4ckfO6FxP8vcQofg2vKZ4NnyrwlwR0F28LEePxj2Haa5m9F2w7p8BaGXC/StWs7JzwpX/kG5ClrR7h58gPUnRYL3RvBS3RIrNAafn5+DAVsswqcK7CZ04qkCy6Seij7JO3ZYWoppEkVEatNewIyugncJX60qgT5IXq84l/zZCzKqt5t0fNJL006gWmXOlqKMvjj7foiAwAzWEBPviXIbHSHpVb59acPJJd5skhmtIVaVg2023+HtEJi5RM+Et9p/DvClrJD37twqHHVWtrGahu/X0NDZO8Hvcf6hyoZ5mpsZTy1ZfFgNrgQ+iMdOZlr4qkzS9A8XVjwYbyDlVolXxqStGqjczBfdRtG9dZ5t9JYzs1IOFx3whLozzIzRhVGkuPKu/Jie7vLJ06tmqoAZtme36+dRvyqKZSk6ZqieOxb962GMFrrrS/h9tiZEkpSq/Q8/yPG3DNcq3iWCpY0XCnUvUuRZ5ogrVc5IYDpBV8/yvbrH4p7NC9n1HxRpiGvvrmu+kfNOq8pj5KP5xq80W/hNSepw4ic/jVbVfwJdMICnOP+caqq0YP1Ywg79sP5rg7KF0ua8MtL9pWtif3HlZz1848YHVL27ofKNs44UiZI0Mfc8YUuoq9mV1NS/W0Tcok5YYJPvhztT6fa/0KLmZotGEct1CuxE8bJREnhXteSFpzNMuROk2/9qkKoCo3W77HFcMCm/mmMzj2DkDaP5xomuCv8PJCvbl7e3Sa9RvIqUHMLgXfXnJsojP11nW9Ebas9URqvrTKLaHhni49mlUvZdUWK6vDcL8O90Qt387HYhYUisVQrjSZl2y8OXFdjVvxMo5HbHIQzj8cXBcyU4PwHuECG3+HUO82r7Sdt2YkxYKvbWlXDxbv7l3W9CmFRSaetxqj7z3RCgVQovRmJ0cqJ2I9iEBWFS/5cqCkkJ+mjpitusp6IcFwrMtZ3PsJMT/pML/4WqY86eTeRLJavS70x+v4oVLcFEJGgtPifbX/9MIHRFao/Lz8/7yeL3dtayqn551yFxRRTFr67sP0PVgCuz/PVt2P9MopYpU6ZMmTJlypQpU6ZMmTJlypQpU6ZMmTJlypQpU6ZMmTJlypQpU6ZMmTJlypQpU6ZMmTJl+n/T/wDXogud8Ucj8AAAAABJRU5ErkJggg==" style="width:54px;height:54px;border-radius:14px;object-fit:contain;"></div>
           <h2 id="amCardTitle">Alight Motion Premium</h2>
           <div class="sub" id="amCardSub">Lisensi resmi · Aktif 1 Tahun</div>
         </div>
         <div class="product-body">
-          <ul class="features" id="amCardFeatures">
+          <ul class="features" id="amCardFeatures" style="display:none;">
             <li>Tanpa watermark di semua hasil export</li>
             <li>Semua font &amp; stiker premium terbuka</li>
             <li>Export kualitas hingga 4K</li>
@@ -1378,7 +1389,7 @@
             <div class="price-period" id="amCardPricePeriod">/ tahun</div>
           </div>
           <button class="buy-btn" onclick="openAccPick()">Beli Sekarang</button>
-          <div class="trust">
+          <div class="trust" style="display:none;">
             <span>🔒 Pembayaran aman</span>
             <span>⚡ Aktivasi instan</span>
             <span>💬 CS responsif</span>
@@ -1387,8 +1398,7 @@
       </div>
     </div>
 
-    <!-- PRODUK TAMBAHAN (di-generate via JS dari panel admin) -->
-    <div class="product-wrap" id="extraProductsWrap" style="padding-top:0;"></div>
+    <!-- Produk tambahan (jika ada) akan ditambahkan otomatis di sebelah kanan kartu utama -->
 
     <!-- TESTIMONI -->
     <section class="testi-section">
@@ -1807,6 +1817,28 @@
 
   </div>
 </div>
+
+<!-- POPUP DETAIL PRODUK -->
+<div class="overlay" id="pdetailOverlay">
+  <div class="modal" style="max-width:380px;">
+    <button class="modal-close-x" onclick="closeProductDetail()" aria-label="Tutup">✕</button>
+    <div style="padding:28px 24px 8px; text-align:center;">
+      <div id="pdIcon" style="width:64px;height:64px;border-radius:16px;margin:0 auto 12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;"></div>
+      <h3 id="pdTitle" style="font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:800;">Nama Produk</h3>
+      <div id="pdSub" style="font-size:0.8rem;color:var(--muted);margin-top:4px;"></div>
+    </div>
+    <div style="padding:14px 24px 4px;">
+      <p id="pdDesc" style="font-size:0.85rem;color:#c4b8ff;line-height:1.7;margin-bottom:14px;"></p>
+      <ul id="pdFeatures" class="features" style="margin-bottom:14px;"></ul>
+      <div class="price-row" style="margin-bottom:18px;">
+        <div class="price" id="pdPrice" style="font-size:1.6rem;">Rp0</div>
+        <div class="price-period" id="pdPeriod">/ sekali bayar</div>
+      </div>
+      <button class="buy-btn" id="pdBuyBtn" style="margin-bottom:16px;">Beli Sekarang</button>
+    </div>
+  </div>
+</div>
+
 <!-- ORDER MODAL -->
 <div class="overlay" id="orderOverlay">
   <div class="modal">
@@ -2387,6 +2419,7 @@
   let annItems = []; // cache di memori untuk panel admin
   let prodMain = { judul:'Alight Motion Premium', sub:'Lisensi resmi · Aktif 1 Tahun', fitur:'Tanpa watermark di semua hasil export\nSemua font & stiker premium terbuka\nExport kualitas hingga 4K\nSupport import preset hingga 5MB & format XML\nGaransi penuh 6 bulan', harga:'Mulai Rp2.000', periode:'/ tahun' }; // cache kartu utama
   let prodExtra = []; // cache kartu produk tambahan
+  let publicExtraProducts = []; // cache produk tambahan versi publik (untuk popup detail)
 
   // Pisahkan record JSONBin (objek baru {announcements, main, extra} ATAU array lama) jadi 3 bagian
   function parseBinRecord(record){
@@ -2444,31 +2477,137 @@
     }
   }
 
-  // Render kartu-kartu produk tambahan ke halaman publik
+  // Render kartu-kartu produk tambahan ke halaman publik (muncul di kanan kartu utama)
   function renderPublicExtraProducts(extra){
-    const wrap = document.getElementById('extraProductsWrap');
-    if (!wrap) return;
-    wrap.innerHTML = '';
-    (extra||[]).forEach(p=>{
+    const row = document.getElementById('productsRow');
+    if (!row) return;
+    publicExtraProducts = extra || [];
+    row.querySelectorAll('.extra-product-card').forEach(el => el.remove());
+    publicExtraProducts.forEach((p, idx)=>{
       const card = document.createElement('div');
-      card.className = 'product-card';
-      const linkHref = p.link ? p.link : ('https://wa.me/6285796640135?text=' + encodeURIComponent('Halo Admin, saya mau tanya produk ' + (p.nama||'') + ' ya'));
+      card.className = 'product-card extra-product-card';
+      const hargaNumber = parseHargaNumber(p.harga);
+      const labelProduk = p.nama || 'Produk';
+      const { stokNum, isHabis } = getStokInfo(p);
+      // Kalau admin isi Link manual, tombol buka link itu. Kalau tidak, tombol langsung buka
+      // modal pemesanan + QRIS otomatis (nominal ikut harga yang diisi admin).
+      const buyAction = p.link
+        ? `window.open('${p.link.replace(/'/g,"\\'")}','_blank')`
+        : `openOrderModal('${labelProduk.replace(/'/g,"\\'")}', ${hargaNumber}, 'extra')`;
+      const stokBadge = stokNum === null ? '' :
+        `<div style="font-size:0.66rem;margin:-6px 0 10px;color:${isHabis ? '#ef4444' : 'var(--muted)'};">${isHabis ? '❌ Stok habis' : '📦 Stok: ' + stokNum}</div>`;
+      const buyBtnHtml = isHabis
+        ? `<button class="buy-btn" disabled style="opacity:0.45;cursor:not-allowed;">Stok Habis</button>`
+        : `<button class="buy-btn" onclick="${buyAction}">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>`;
       card.innerHTML = `
-        <div class="product-header">
-          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:2.6rem;">${escHtml(p.icon || '🛍️')}</div>
+        <div class="product-header" style="cursor:pointer;${isHabis ? 'opacity:0.6;' : ''}" onclick="openProductDetailExtra(${idx})">
+          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;">${escHtml(p.icon || '🛍️')}</div>
           <h2>${escHtml(p.nama || 'Nama Produk')}</h2>
           <div class="sub">${escHtml(p.sub || '')}</div>
         </div>
         <div class="product-body">
-          <p style="color:var(--muted); font-size:0.85rem; line-height:1.6; margin-bottom:20px;">${escHtml(p.deskripsi || '')}</p>
+          <p style="color:var(--muted); font-size:0.72rem; line-height:1.5; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer;" onclick="openProductDetailExtra(${idx})">${escHtml(p.deskripsi || '')}</p>
           <div class="price-row">
             <div class="price">${escHtml(p.harga || 'Rp0')}</div>
             <div class="price-period">${escHtml(p.periode || '/ sekali bayar')}</div>
           </div>
-          <button class="buy-btn" onclick="window.open('${linkHref.replace(/'/g,"\\'")}','_blank')">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>
+          ${stokBadge}
+          ${buyBtnHtml}
         </div>
       `;
-      wrap.appendChild(card);
+      row.appendChild(card);
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  //  POPUP DETAIL PRODUK — tap kartu untuk lihat info lengkap, baru lanjut Beli
+  // ════════════════════════════════════════════════
+  function openProductDetail(data){
+    document.getElementById('pdIcon').innerHTML = data.iconHtml || '🛍️';
+    document.getElementById('pdTitle').textContent = data.title || '';
+    document.getElementById('pdSub').textContent = data.sub || '';
+
+    const descEl = document.getElementById('pdDesc');
+    if (data.desc) { descEl.textContent = data.desc; descEl.style.display = 'block'; }
+    else { descEl.style.display = 'none'; }
+
+    const featEl = document.getElementById('pdFeatures');
+    featEl.innerHTML = '';
+    if (data.features && data.features.length){
+      featEl.style.display = 'flex';
+      data.features.forEach(line=>{
+        const li = document.createElement('li');
+        li.textContent = line;
+        featEl.appendChild(li);
+      });
+    } else {
+      featEl.style.display = 'none';
+    }
+
+    document.getElementById('pdPrice').textContent = data.price || '';
+    document.getElementById('pdPeriod').textContent = data.period || '';
+    const btn = document.getElementById('pdBuyBtn');
+    if (data.disabled) {
+      btn.textContent = data.buyText || 'Stok Habis';
+      btn.disabled = true;
+      btn.style.opacity = '0.45';
+      btn.style.cursor = 'not-allowed';
+      btn.onclick = null;
+    } else {
+      btn.textContent = data.buyText || 'Beli Sekarang';
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.onclick = function(){
+        closeProductDetail();
+        data.onBuy();
+      };
+    }
+    document.getElementById('pdetailOverlay').classList.add('open');
+  }
+
+  function closeProductDetail(){
+    document.getElementById('pdetailOverlay').classList.remove('open');
+  }
+
+  // Detail untuk kartu Alight Motion (ambil data langsung dari kartu yang tampil)
+  function openProductDetailAM(){
+    const fitur = Array.from(document.querySelectorAll('#amCardFeatures li')).map(li => li.textContent);
+    const imgEl = document.querySelector('#mainProductCard .app-icon img');
+    openProductDetail({
+      iconHtml: imgEl ? '<img src="' + imgEl.src + '" style="width:100%;height:100%;object-fit:contain;">' : '📦',
+      title: document.getElementById('amCardTitle').textContent,
+      sub: document.getElementById('amCardSub').textContent,
+      desc: '',
+      features: fitur,
+      price: document.getElementById('amCardPrice').textContent,
+      period: document.getElementById('amCardPricePeriod').textContent,
+      buyText: 'Beli Sekarang',
+      onBuy: function(){ openAccPick(); }
+    });
+  }
+
+  // Detail untuk produk tambahan (ambil dari data yang sama dipakai kartu publik)
+  function openProductDetailExtra(idx){
+    const p = publicExtraProducts[idx];
+    if (!p) return;
+    const hargaNumber = parseHargaNumber(p.harga);
+    const labelProduk = p.nama || 'Produk';
+    const { isHabis } = getStokInfo(p);
+    openProductDetail({
+      iconHtml: escHtml(p.icon || '🛍️'),
+      title: p.nama || 'Nama Produk',
+      sub: p.sub || '',
+      desc: p.deskripsi || '',
+      features: [],
+      price: p.harga || 'Rp0',
+      period: p.periode || '/ sekali bayar',
+      buyText: isHabis ? 'Stok Habis' : (p.teksTombol || 'Beli Sekarang'),
+      disabled: isHabis,
+      onBuy: function(){
+        if (p.link) window.open(p.link, '_blank');
+        else openOrderModal(labelProduk, hargaNumber, 'extra');
+      }
     });
   }
 
@@ -2656,8 +2795,9 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Harga</label>
-            <input type="text" value="${escAttr(p.harga||'')}" oninput="adUpdateProduct(${idx},'harga',this.value)" placeholder="Rp0"
+            <input type="text" value="${escAttr(p.harga||'')}" oninput="adUpdateProduct(${idx},'harga',this.value)" placeholder="Rp50.000"
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:3px;">Angka di sini otomatis jadi nominal QRIS saat pembeli checkout</div>
           </div>
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Periode</label>
@@ -2672,10 +2812,15 @@
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Link Tombol (opsional, default chat WA)</label>
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Link Tombol (opsional — default: bayar QRIS otomatis sesuai Harga)</label>
             <input type="text" value="${escAttr(p.link||'')}" oninput="adUpdateProduct(${idx},'link',this.value)" placeholder="https://..."
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
           </div>
+        </div>
+        <div style="margin-top:10px;">
+          <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Stok (kosongkan = tidak dibatasi, isi 0 = tampil "Stok Habis")</label>
+          <input type="number" min="0" value="${p.stok===undefined||p.stok===null?'':escAttr(p.stok)}" oninput="adUpdateProduct(${idx},'stok',this.value)" placeholder="Contoh: 5"
+            style="width:100%;max-width:140px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
         </div>
       `;
       list.appendChild(card);
@@ -2702,7 +2847,8 @@
       harga: 'Rp0',
       periode: '/ sekali bayar',
       teksTombol: 'Beli Sekarang',
-      link: ''
+      link: '',
+      stok: ''
     });
     renderExtraProductsAdmin();
     const list = document.getElementById('adExtraList');
@@ -2771,6 +2917,21 @@
 
   function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+  // Ambil angka murni dari teks harga (mis. "Rp50.000" -> 50000), dipakai untuk isi nominal QRIS otomatis
+  function parseHargaNumber(s){
+    const digits = String(s||'').replace(/[^0-9]/g, '');
+    const n = parseInt(digits, 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  // Baca status stok produk tambahan. stok kosong = tidak dibatasi (selalu bisa dibeli).
+  function getStokInfo(p){
+    if (p.stok === undefined || p.stok === null || p.stok === '') return { stokNum: null, isHabis: false };
+    const n = parseInt(p.stok, 10);
+    if (isNaN(n)) return { stokNum: null, isHabis: false };
+    return { stokNum: n, isHabis: n <= 0 };
+  }
 
   function adUpdateItem(idx, field, value){
     if (!annItems[idx]) return;
