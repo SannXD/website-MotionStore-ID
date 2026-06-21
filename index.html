@@ -1389,7 +1389,7 @@
             <div class="price-period" id="amCardPricePeriod">/ tahun</div>
           </div>
           <div id="amStokBadge" style="font-size:0.66rem;margin:-6px 0 10px;color:var(--muted);"></div>
-          <button class="buy-btn" id="amBuyBtn" onclick="openAccPick()">Beli Sekarang</button>
+          <button class="buy-btn" id="amBuyBtn" onclick="openProductDetailAM()">Beli Sekarang</button>
           <div class="trust" style="display:none;">
             <span>🔒 Pembayaran aman</span>
             <span>⚡ Aktivasi instan</span>
@@ -2266,21 +2266,32 @@
   const firstNames = ['Rizky','Dinda','Fajar','Ahmad','Siti','Budi','Ani','Hendra','Lina','Wendra','Yani','Eka','Rudi','Nova','Joni','Sasha','Putri','Rina','Bambang','Citra'];
   const cities = ['Bandung','Surabaya','Jakarta','Medan','Semarang','Yogyakarta','Makassar','Malang','Tangerang','Bekasi','Bogor','Solo','Batam','Banjarmasin','Pontianak'];
   const purchaseMessages = [
-    'baru saja membeli Alight Motion Premium',
-    'sudah berhasil aktivasi lisensi premium',
-    'baru selesai transaksi Alight Motion',
-    'membeli paket 1 tahun premium',
-    'checkout berhasil, sedang diaktivasi',
-    'sudah dapat akses penuh editor'
+    'baru saja membeli {p}',
+    'sudah berhasil aktivasi {p}',
+    'baru selesai transaksi {p}',
+    'checkout {p} berhasil',
+    'baru saja checkout {p}',
+    'mendapat akses penuh setelah beli {p}'
   ];
+
+  // Ambil daftar nama semua produk yang lagi tampil (AM + produk tambahan) buat notifikasi live
+  function getAllProductNames(){
+    const names = [(typeof prodMain !== 'undefined' && prodMain.judul) ? prodMain.judul : 'Alight Motion Premium'];
+    (typeof publicExtraProducts !== 'undefined' ? publicExtraProducts : []).forEach(p=>{
+      if (p && p.nama) names.push(p.nama);
+    });
+    return names;
+  }
 
   function getRandomProof(){
     const name = firstNames[Math.floor(Math.random() * firstNames.length)];
     const city = cities[Math.floor(Math.random() * cities.length)];
-    const msg = purchaseMessages[Math.floor(Math.random() * purchaseMessages.length)];
+    const names = getAllProductNames();
+    const product = names[Math.floor(Math.random() * names.length)];
+    const template = purchaseMessages[Math.floor(Math.random() * purchaseMessages.length)];
     return {
       name: name + ', ' + city,
-      text: msg,
+      text: template.replace('{p}', product),
       initials: name[0]
     };
   }
@@ -2457,7 +2468,7 @@
         btn.disabled = false;
         btn.style.opacity = '';
         btn.style.cursor = '';
-        btn.onclick = openAccPick;
+        btn.onclick = openProductDetailAM;
       }
     }
   }
@@ -2471,19 +2482,14 @@
     publicExtraProducts.forEach((p, idx)=>{
       const card = document.createElement('div');
       card.className = 'product-card extra-product-card';
-      const hargaNumber = parseHargaNumber(p.harga);
-      const labelProduk = p.nama || 'Produk';
       const { stokNum, isHabis } = getStokInfo(p);
-      // Kalau admin isi Link manual, tombol buka link itu. Kalau tidak, tombol langsung buka
-      // modal pemesanan + QRIS otomatis (nominal ikut harga yang diisi admin).
-      const buyAction = p.link
-        ? `window.open('${p.link.replace(/'/g,"\\'")}','_blank')`
-        : `openOrderModal('${labelProduk.replace(/'/g,"\\'")}', ${hargaNumber}, 'extra')`;
       const stokBadge = stokNum === null ? '' :
         `<div style="font-size:0.66rem;margin:-6px 0 10px;color:${isHabis ? '#ef4444' : 'var(--muted)'};">${isHabis ? '❌ Stok habis' : '📦 Stok: ' + stokNum}</div>`;
+      // Tombol "Beli Sekarang" di kartu buka popup detail dulu (deskripsi lengkap ada di sana),
+      // baru dari dalam popup itu lanjut ke pembayaran beneran.
       const buyBtnHtml = isHabis
         ? `<button class="buy-btn" disabled style="opacity:0.45;cursor:not-allowed;">Stok Habis</button>`
-        : `<button class="buy-btn" onclick="${buyAction}">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>`;
+        : `<button class="buy-btn" onclick="openProductDetailExtra(${idx})">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>`;
       card.innerHTML = `
         <div class="product-header" style="cursor:pointer;${isHabis ? 'opacity:0.6;' : ''}" onclick="openProductDetailExtra(${idx})">
           <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;">${escHtml(p.icon || '🛍️')}</div>
@@ -2491,7 +2497,6 @@
           <div class="sub">${escHtml(p.sub || '')}</div>
         </div>
         <div class="product-body">
-          <p style="color:var(--muted); font-size:0.72rem; line-height:1.5; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer;" onclick="openProductDetailExtra(${idx})">${escHtml(p.deskripsi || '')}</p>
           <div class="price-row">
             <div class="price">${escHtml(p.harga || 'Rp0')}</div>
             <div class="price-period">${escHtml(p.periode || '/ sekali bayar')}</div>
