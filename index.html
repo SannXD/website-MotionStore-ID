@@ -2473,11 +2473,7 @@
   }
 
   function tampilAnnFeed(items){
-    // Cache "sudah dibaca" berdasarkan gabungan ID semua item (supaya muncul lagi kalau ada item baru)
     const idGabungan = items.map(it => it.id).join(',');
-    const storageKey = 'annfeed_read';
-    const saved = localStorage.getItem(storageKey);
-    if (saved === idGabungan) return; // sudah dibaca semua, tidak ada item baru
 
     const body = document.getElementById('annfeedBody');
     body.innerHTML = '';
@@ -2515,7 +2511,7 @@
 
   function tutupAnnFeed(idGabungan){
     document.getElementById('annfeedOverlay').classList.remove('visible');
-    localStorage.setItem('annfeed_read', idGabungan);
+    // Sengaja tidak disimpan ke localStorage — pop-up akan tetap muncul lagi tiap web dibuka ulang.
   }
 
   window.addEventListener('load', initAnn);
