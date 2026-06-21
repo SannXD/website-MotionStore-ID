@@ -1388,7 +1388,8 @@
             <div class="price" id="amCardPrice">Mulai Rp2.000</div>
             <div class="price-period" id="amCardPricePeriod">/ tahun</div>
           </div>
-          <button class="buy-btn" onclick="openAccPick()">Beli Sekarang</button>
+          <div id="amStokBadge" style="font-size:0.66rem;margin:-6px 0 10px;color:var(--muted);"></div>
+          <button class="buy-btn" id="amBuyBtn" onclick="openAccPick()">Beli Sekarang</button>
           <div class="trust" style="display:none;">
             <span>🔒 Pembayaran aman</span>
             <span>⚡ Aktivasi instan</span>
@@ -2417,7 +2418,7 @@
   // ════════════════════════════════════════════════
   const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_ID;
   let annItems = []; // cache di memori untuk panel admin
-  let prodMain = { judul:'Alight Motion Premium', sub:'Lisensi resmi · Aktif 1 Tahun', fitur:'Tanpa watermark di semua hasil export\nSemua font & stiker premium terbuka\nExport kualitas hingga 4K\nSupport import preset hingga 5MB & format XML\nGaransi penuh 6 bulan', harga:'Mulai Rp2.000', periode:'/ tahun' }; // cache kartu utama
+  let prodMain = { judul:'Alight Motion Premium', sub:'Lisensi resmi · Aktif 1 Tahun', fitur:'Tanpa watermark di semua hasil export\nSemua font & stiker premium terbuka\nExport kualitas hingga 4K\nSupport import preset hingga 5MB & format XML\nGaransi penuh 6 bulan', harga:'Mulai Rp2.000', periode:'/ tahun', stok:'' }; // cache kartu utama
   let prodExtra = []; // cache kartu produk tambahan
   let publicExtraProducts = []; // cache produk tambahan versi publik (untuk popup detail)
 
@@ -2458,6 +2459,7 @@
 
   // Tampilkan isi kartu utama (Alight Motion) hasil edit admin ke halaman publik
   function renderPublicMainCard(main){
+    prodMain = main; // simpan juga ke cache global biar popup detail bisa baca status stok terbaru
     const elT = document.getElementById('amCardTitle');
     const elS = document.getElementById('amCardSub');
     const elF = document.getElementById('amCardFeatures');
@@ -2474,6 +2476,28 @@
         li.textContent = line;
         elF.appendChild(li);
       });
+    }
+    const { stokNum, isHabis } = getStokInfo(main);
+    const badge = document.getElementById('amStokBadge');
+    if (badge) {
+      badge.textContent = stokNum === null ? '' : (isHabis ? '❌ Stok habis' : '📦 Stok: ' + stokNum);
+      badge.style.color = isHabis ? '#ef4444' : 'var(--muted)';
+    }
+    const btn = document.getElementById('amBuyBtn');
+    if (btn) {
+      if (isHabis) {
+        btn.textContent = 'Stok Habis';
+        btn.disabled = true;
+        btn.style.opacity = '0.45';
+        btn.style.cursor = 'not-allowed';
+        btn.onclick = null;
+      } else {
+        btn.textContent = 'Beli Sekarang';
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.cursor = '';
+        btn.onclick = openAccPick;
+      }
     }
   }
 
@@ -2574,6 +2598,7 @@
   function openProductDetailAM(){
     const fitur = Array.from(document.querySelectorAll('#amCardFeatures li')).map(li => li.textContent);
     const imgEl = document.querySelector('#mainProductCard .app-icon img');
+    const { isHabis } = getStokInfo(prodMain);
     openProductDetail({
       iconHtml: imgEl ? '<img src="' + imgEl.src + '" style="width:100%;height:100%;object-fit:contain;">' : '📦',
       title: document.getElementById('amCardTitle').textContent,
@@ -2582,7 +2607,8 @@
       features: fitur,
       price: document.getElementById('amCardPrice').textContent,
       period: document.getElementById('amCardPricePeriod').textContent,
-      buyText: 'Beli Sekarang',
+      buyText: isHabis ? 'Stok Habis' : 'Beli Sekarang',
+      disabled: isHabis,
       onBuy: function(){ openAccPick(); }
     });
   }
@@ -2745,6 +2771,11 @@
           <input type="text" value="${escAttr(prodMain.periode||'')}" oninput="adUpdateMain('periode',this.value)"
             style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
         </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Stok (kosongkan = tidak dibatasi, isi 0 = tampil "Stok Habis")</label>
+        <input type="number" min="0" value="${prodMain.stok===undefined||prodMain.stok===null?'':escAttr(prodMain.stok)}" oninput="adUpdateMain('stok',this.value)" placeholder="Contoh: 10"
+          style="width:100%;max-width:140px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
       </div>
     `;
   }
