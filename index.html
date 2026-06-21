@@ -2813,6 +2813,16 @@
   }
 
   // Render kartu-kartu produk tambahan ke halaman publik (muncul di kanan kartu utama)
+  // Render ikon produk: kalau berupa URL gambar, tampilkan <img>; kalau bukan, tampilkan sebagai emoji/teks
+  function renderProdIcon(icon, sizePx){
+    const val = (icon || '').trim();
+    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
+    if (isUrl) {
+      return '<img src="' + escAttr(val) + '" style="width:' + sizePx + 'px;height:' + sizePx + 'px;border-radius:14px;object-fit:cover;" onerror="this.outerHTML=\'📦\'">';
+    }
+    return escHtml(val || '🛍️');
+  }
+
   function renderPublicExtraProducts(extra){
     const row = document.getElementById('productsRow');
     if (!row) return;
@@ -2833,7 +2843,7 @@
         : `<button class="buy-btn" onclick="openProductDetailExtra(${idx})">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>`;
       card.innerHTML = `
         <div class="product-header" style="cursor:pointer;${isHabis ? 'opacity:0.6;' : ''}" onclick="openProductDetailExtra(${idx})">
-          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;">${escHtml(p.icon || '🛍️')}</div>
+          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;overflow:hidden;">${renderProdIcon(p.icon, 54)}</div>
           <h2>${escHtml(p.nama || 'Nama Produk')}</h2>
           <div class="sub">${escHtml(p.sub || '')}</div>
         </div>
@@ -2929,7 +2939,7 @@
     const labelProduk = p.nama || 'Produk';
     const { isHabis } = getStokInfo(p);
     openProductDetail({
-      iconHtml: escHtml(p.icon || '🛍️'),
+      iconHtml: renderProdIcon(p.icon, 64),
       title: p.nama || 'Nama Produk',
       sub: p.sub || '',
       desc: p.deskripsi || '',
@@ -3113,9 +3123,13 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:10px;">
           <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Ikon (emoji)</label>
-            <input type="text" value="${escAttr(p.icon||'🛍️')}" oninput="adUpdateProduct(${idx},'icon',this.value)"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Foto Produk (link gambar)</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <img id="adIconPrev${idx}" src="${escAttr(p.icon||'')}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--surface);border:1px solid var(--border);${/^(https?:)?\/\//.test((p.icon||'').trim())||/^data:image\//.test((p.icon||'').trim())?'':'display:none;'}" onerror="this.style.display='none';">
+              <input type="text" value="${escAttr(p.icon||'')}" oninput="adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});" placeholder="https://contoh.com/gambar.jpg"
+                style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:3px;">Tempel link gambar (URL). Kosongkan untuk pakai ikon default 🛍️</div>
           </div>
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Nama Produk</label>
@@ -3192,6 +3206,19 @@
     badge.textContent = katLabel;
   }
 
+  function adRefreshIconPreview(idx){
+    const img = document.getElementById('adIconPrev' + idx);
+    if (!img || !prodExtra[idx]) return;
+    const val = (prodExtra[idx].icon || '').trim();
+    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
+    if (isUrl) {
+      img.src = val;
+      img.style.display = '';
+    } else {
+      img.style.display = 'none';
+    }
+  }
+
   function adRemoveProduct(idx){
     prodExtra.splice(idx, 1);
     renderExtraProductsAdmin();
@@ -3200,7 +3227,7 @@
   function adAddProduct(){
     prodExtra.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-      icon: '🛍️',
+      icon: '',
       nama: '',
       sub: '',
       kategori: 'apk',
