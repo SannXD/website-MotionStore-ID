@@ -1784,7 +1784,6 @@
           <div class="ap-type-perk">Akun pakai email toko kami, tidak perlu daftar</div>
           <div class="ap-type-perk">Aktivasi lebih cepat &amp; mudah</div>
           <div class="ap-type-perk">Harga paling hemat, cocok untuk pengguna baru</div>
-          <div class="ap-type-perk" style="color:#ff6b6b;font-weight:700;" id="amSellerStockText">🔥 Stok 18 akun</div>
         </div>
       </div>
 
@@ -2128,45 +2127,8 @@
     renderQris(uniqueNominal);
     startTimer();
   }
-  // ════════════════════════════════════════════════
-  //  STOK AM (sinkron semua orang, via Supabase)
-  // ════════════════════════════════════════════════
-  async function fetchAmStock(){
-    try {
-      const res = await fetch('/.netlify/functions/stock');
-      const data = await res.json();
-      renderAmStock(data.remaining);
-    } catch(e) {
-      // kalau gagal fetch, biarkan teks default tampil
-    }
-  }
-
-  async function reduceAmStock(){
-    try {
-      const res = await fetch('/.netlify/functions/stock', { method: 'POST' });
-      const data = await res.json();
-      renderAmStock(data.remaining);
-    } catch(e) {}
-  }
-
-  function renderAmStock(remaining){
-    const el = document.getElementById('amSellerStockText');
-    if (!el || remaining === undefined) return;
-    if (remaining <= 0){
-      el.textContent = '❌ Stok habis';
-      const sellerOpt = document.getElementById('accpick-seller');
-      if (sellerOpt) sellerOpt.classList.add('disabled');
-    } else {
-      el.textContent = '🔥 Stok ' + remaining + ' akun';
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', fetchAmStock);
 
   function confirmPaid(){
-    if (currentOrder.type === 'am' && selectedAccType === 'seller'){
-      reduceAmStock();
-    }
     const name = document.getElementById('custName').value.trim();
     const wa = document.getElementById('custWA').value.trim();
     const garis = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
@@ -2353,7 +2315,6 @@
   function openAccPick(){
     accpickSelected = selectedAccType;
     _renderAccPick();
-    fetchAmStock();
     const overlay = document.getElementById('accpickOverlay');
     overlay.style.display = 'flex';
     // small rAF so browser registers display:flex before transition fires
