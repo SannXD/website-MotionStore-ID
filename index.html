@@ -3103,10 +3103,12 @@
     }
     prodExtra.forEach((p, idx) => {
       const card = document.createElement('div');
+      card.id = 'adProdCard' + idx;
       card.style = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;';
+      const katLabel = {apk:'📱 Apk Premium', tutorial:'📚 Tutorial', smm:'📈 SMM Panel', lainnya:'✨ Lainnya'}[p.kategori || 'apk'] || '📱 Apk Premium';
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span style="font-size:0.78rem;color:var(--muted);">Kartu Produk #${idx+1}</span>
+          <span style="font-size:0.78rem;color:var(--muted);">Kartu Produk #${idx+1} &middot; <span id="adKatBadge${idx}" style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;">${katLabel}</span></span>
           <button type="button" onclick="adRemoveProduct(${idx})" style="background:none;border:none;color:#fc5ca0;font-size:0.78rem;cursor:pointer;font-family:inherit;">🗑️ Hapus</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:10px;">
@@ -3129,7 +3131,7 @@
           </div>
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Kategori</label>
-            <select onchange="adUpdateProduct(${idx},'kategori',this.value)"
+            <select id="adKategori${idx}" onchange="adUpdateProduct(${idx},'kategori',this.value); adRefreshKategoriBadge(${idx});"
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
               <option value="apk" ${(p.kategori||'apk')==='apk'?'selected':''}>📱 Apk Premium</option>
               <option value="tutorial" ${p.kategori==='tutorial'?'selected':''}>📚 Tutorial</option>
@@ -3181,6 +3183,13 @@
   function adUpdateProduct(idx, field, value){
     if (!prodExtra[idx]) return;
     prodExtra[idx][field] = value;
+  }
+
+  function adRefreshKategoriBadge(idx){
+    const badge = document.getElementById('adKatBadge' + idx);
+    if (!badge || !prodExtra[idx]) return;
+    const katLabel = {apk:'📱 Apk Premium', tutorial:'📚 Tutorial', smm:'📈 SMM Panel', lainnya:'✨ Lainnya'}[prodExtra[idx].kategori || 'apk'] || '📱 Apk Premium';
+    badge.textContent = katLabel;
   }
 
   function adRemoveProduct(idx){
