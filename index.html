@@ -617,6 +617,8 @@
   .smm-service-card:hover { border-color:var(--accent); transform:translateY(-2px); }
   .smm-service-info h4 { font-family:'Sora',sans-serif; font-size:0.92rem; font-weight:700; color:var(--text); margin-bottom:4px; }
   .smm-service-info p { font-size:0.76rem; color:var(--muted); line-height:1.4; }
+  .smm-service-desc { font-size:0.76rem; color:var(--muted); line-height:1.4; margin-bottom:4px; }
+  .smm-service-unit-price { font-size:0.78rem; color:var(--accent); font-weight:700; }
   .smm-service-price { font-family:'Sora',sans-serif; font-weight:800; color:var(--accent); font-size:0.95rem; white-space:nowrap; margin-bottom:6px; text-align:right; }
   .smm-service-right { display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0; }
   .smm-buy-btn {
@@ -626,6 +628,32 @@
     transition:opacity .2s;
   }
   .smm-buy-btn:hover { opacity:0.88; }
+
+  /* Checklist multi-pilih di modal pesan SMM */
+  .smm-check-item {
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:12px 14px; transition:border-color .2s;
+  }
+  .smm-check-item.checked { border-color:var(--accent); }
+  .smm-check-head { display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
+  .smm-check-head input[type="checkbox"] { width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; margin-top:2px; cursor:pointer; }
+  .smm-check-name { font-family:'Sora',sans-serif; font-size:0.88rem; font-weight:700; color:var(--text); }
+  .smm-check-price { font-size:0.74rem; color:var(--muted); margin-top:2px; line-height:1.4; }
+  .smm-check-body { display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+  .smm-check-item.checked .smm-check-body { display:block; }
+  .smm-qty-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .smm-qty-row label { font-size:0.78rem; color:var(--muted); flex-shrink:0; }
+  .smm-qty-row input[type="number"] {
+    flex:1; max-width:120px; background:var(--card); border:1px solid var(--border); color:var(--text);
+    padding:7px 10px; border-radius:8px; font-size:0.85rem; font-family:inherit; text-align:right;
+  }
+  .smm-line-total { text-align:right; font-family:'Sora',sans-serif; font-weight:700; font-size:0.85rem; color:var(--accent); margin-bottom:4px; }
+  .smm-check-note-wrap { margin-top:8px; }
+  .smm-check-note-wrap label { font-size:0.76rem; color:var(--muted); display:block; margin-bottom:4px; }
+  .smm-check-note-wrap textarea {
+    width:100%; background:var(--card); border:1px solid var(--border); color:var(--text);
+    padding:8px 10px; border-radius:8px; font-size:0.82rem; font-family:inherit; resize:vertical; box-sizing:border-box;
+  }
   .smm-note {
     font-size:0.74rem; color:var(--muted); background:rgba(124,92,252,0.08);
     border-left:2px solid var(--accent); padding:10px 12px; border-radius:6px;
@@ -1650,6 +1678,7 @@
     <a class="nav-link active" data-page="home" onclick="showPage('home')">Beranda</a>
     <a class="nav-link" data-page="produk" onclick="showPage('produk')">Produk</a>
     <a class="nav-link" data-page="sosmed" onclick="showPage('sosmed')">Suntik Sosmed</a>
+    <a class="nav-link" data-page="riwayat" onclick="showPage('riwayat')">Riwayat</a>
     <a class="nav-link" data-page="cara" onclick="showPage('cara')">Cara Aktivasi</a>
     <a class="nav-link" data-page="bantuan" onclick="showPage('bantuan')">Bantuan</a>
     <div class="nav-drawer-footer">
@@ -1660,6 +1689,18 @@
 
   <!-- PAGE: HOME -->
   <div class="page active" id="page-home">
+
+    <!-- Banner pengingat pesanan belum dikonfirmasi (muncul otomatis kalau ada) -->
+    <div id="pendingPaymentBanner" style="display:none;align-items:center;gap:12px;margin:12px 16px 0;padding:13px 14px;border-radius:14px;background:rgba(255,184,77,0.12);border:1px solid rgba(255,184,77,0.35);">
+      <span style="font-size:1.4rem;flex-shrink:0;">⏳</span>
+      <span style="flex:1;min-width:0;">
+        <strong style="display:block;font-size:0.85rem;color:#ffb84d;font-family:'Sora',sans-serif;">Pesanan belum dikonfirmasi</strong>
+        <span style="display:block;font-size:0.76rem;color:var(--muted);margin-top:2px;" id="pendingPaymentLabel">Pesanan kamu</span>
+        <span style="display:block;font-size:0.76rem;color:var(--muted);">Total: <span id="pendingPaymentNominal">Rp0</span></span>
+      </span>
+      <a id="pendingPaymentWaBtn" href="#" target="_blank" onclick="clearPendingPayment()" style="flex-shrink:0;background:#22c55e;color:#fff;text-decoration:none;font-size:0.78rem;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap;">💬 Lanjut WA</a>
+    </div>
+
     <section class="hero">
       <div class="orb orb1"></div>
       <div class="orb orb2"></div>
@@ -1747,90 +1788,55 @@
   <!-- PAGE: SUNTIK SOSMED -->
   <div class="page" id="page-sosmed">
     <div class="smm-wrap">
-      <div class="smm-maintenance">
-        <div class="smm-maintenance-icon">⚙️</div>
-        <h2>Sedang Diperbaiki</h2>
-        <p>Layanan Suntik Sosmed sedang dalam perbaikan. Kami akan kembali secepatnya, terima kasih atas pengertiannya 🙏</p>
-      </div>
-
-      <!-- KONTEN LAMA (disimpan, tinggal un-comment kalau sudah siap lagi) -->
-      <!--
       <div class="smm-intro">
         <h2>📈 Suntik Sosmed</h2>
-        <p>Naikkan followers, likes, dan views akun Instagram & TikTok kamu secara instan. Proses cepat, aman, tanpa password.</p>
+        <p>Naikkan followers, likes, dan views akun sosial media kamu. Pilih layanan, atur jumlah, bisa lebih dari satu sekaligus dalam 1 link.</p>
       </div>
 
-      <div class="smm-platform-tabs">
-        <div class="smm-tab active" data-platform="ig" onclick="switchSmmTab('ig')">📷 Instagram</div>
-        <div class="smm-tab" data-platform="tiktok" onclick="switchSmmTab('tiktok')">🎵 TikTok</div>
-      </div>
+      <div class="smm-platform-tabs" id="smmPlatformTabs"></div>
 
-      <div class="smm-platform-group active" id="smm-group-ig">
-        <div class="smm-service-card">
-          <div class="smm-service-info">
-            <h4>Followers Instagram</h4>
-            <p>1.000 followers · real & aktif</p>
-          </div>
-          <div class="smm-service-right">
-            <div class="smm-service-price">Rp15.000</div>
-            <button class="smm-buy-btn" onclick="openOrderModal('Followers Instagram – 1.000', 15000, 'smm')">Pesan</button>
-          </div>
-        </div>
-        <div class="smm-service-card">
-          <div class="smm-service-info">
-            <h4>Likes Instagram</h4>
-            <p>1.000 likes · proses cepat</p>
-          </div>
-          <div class="smm-service-right">
-            <div class="smm-service-price">Rp8.000</div>
-            <button class="smm-buy-btn" onclick="openOrderModal('Likes Instagram – 1.000', 8000, 'smm')">Pesan</button>
-          </div>
-        </div>
-        <div class="smm-service-card">
-          <div class="smm-service-info">
-            <h4>Views Reels Instagram</h4>
-            <p>1.000 views · untuk video Reels</p>
-          </div>
-          <div class="smm-service-right">
-            <div class="smm-service-price">Rp5.000</div>
-            <button class="smm-buy-btn" onclick="openOrderModal('Views Reels Instagram – 1.000', 5000, 'smm')">Pesan</button>
-          </div>
-        </div>
-      </div>
+      <div id="smmPlatformGroups"></div>
 
-      <div class="smm-platform-group" id="smm-group-tiktok">
-        <div class="smm-service-card">
-          <div class="smm-service-info">
-            <h4>Followers TikTok</h4>
-            <p>1.000 followers · real & aktif</p>
-          </div>
-          <div class="smm-service-right">
-            <div class="smm-service-price">Rp15.000</div>
-            <button class="smm-buy-btn" onclick="openOrderModal('Followers TikTok – 1.000', 15000, 'smm')">Pesan</button>
-          </div>
-        </div>
-        <div class="smm-service-card">
-          <div class="smm-service-info">
-            <h4>Likes TikTok</h4>
-            <p>1.000 likes · proses cepat</p>
-          </div>
-          <div class="smm-service-right">
-            <div class="smm-service-price">Rp7.000</div>
-            <button class="smm-buy-btn" onclick="openOrderModal('Likes TikTok – 1.000', 7000, 'smm')">Pesan</button>
-          </div>
-        </div>
-        <div class="smm-service-card">
-          <div class="smm-service-info">
-            <h4>Views TikTok</h4>
-            <p>1.000 views · untuk video TikTok</p>
-          </div>
-          <div class="smm-service-right">
-            <div class="smm-service-price">Rp3.000</div>
-            <button class="smm-buy-btn" onclick="openOrderModal('Views TikTok – 1.000', 3000, 'smm')">Pesan</button>
-          </div>
-        </div>
+      <div id="smmEmptyState" style="display:none;text-align:center;color:var(--muted);font-size:0.85rem;padding:40px 20px;">
+        Belum ada layanan Suntik Sosmed yang tersedia saat ini.
       </div>
-      -->
+    </div>
+  </div>
+
+  <!-- SMM ORDER MODAL — pilih layanan (bisa lebih dari 1), atur jumlah, lalu lanjut ke order biasa -->
+  <div class="overlay" id="smmOrderOverlay">
+    <div class="modal" style="max-width:420px;">
+      <button class="modal-close-x" onclick="closeSmmOrderModal()" aria-label="Tutup">✕</button>
+      <div class="modal-head">
+        <h3 id="smmModalPlatformName">Instagram</h3>
+        <p>Pilih layanan, atur jumlah, lalu lanjutkan</p>
+      </div>
+      <div class="step-body">
+        <div id="smmServiceCheckList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:6px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--border);margin-top:10px;">
+          <span style="font-size:0.85rem;color:var(--muted);">Total</span>
+          <span id="smmModalTotal" style="font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:800;">Rp0</span>
+        </div>
+        <div class="inp-group">
+          <label>Link / Username Sosial Media</label>
+          <input type="text" id="smmModalTarget" placeholder="@username atau link postingan">
+        </div>
+        <button class="next-btn" id="smmModalNextBtn" onclick="proceedSmmOrder()">Lanjut ke Pemesanan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: RIWAYAT TRANSAKSI -->
+  <div class="page" id="page-riwayat">
+    <div style="max-width:560px;margin:0 auto;padding:0 16px 60px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <h2 style="font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:8px;">🧾 Riwayat Transaksi</h2>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;">Daftar pesanan yang pernah kamu buat di perangkat ini.</p>
+      </div>
+      <div id="riwayatList"></div>
+      <div id="riwayatEmptyState" style="display:none;text-align:center;color:var(--muted);font-size:0.85rem;padding:40px 20px;">
+        Belum ada riwayat transaksi di perangkat ini.
+      </div>
     </div>
   </div>
 
@@ -2521,9 +2527,117 @@
     pesan += '\n' + garis;
 
     pesan += '\n\nMohon dicek dan diaktifkan ya, terima kasih 🙏';
-    document.getElementById('waConfirmBtn').href = 'https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(pesan);
+    const waLink = 'https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(pesan);
+    const waBtn = document.getElementById('waConfirmBtn');
+    waBtn.href = waLink;
+    const trxId = 'trx_' + Date.now();
+    waBtn.onclick = function(){ clearPendingPayment(); markRiwayatConfirmed(trxId); };
     clearInterval(countdownInterval);
     showOrderStep(3);
+
+    // Simpan info pesanan yang belum dikonfirmasi, supaya kalau orang reload web,
+    // muncul pengingat untuk lanjut konfirmasi WA tanpa harus bingung ulang dari awal
+    try {
+      localStorage.setItem('pendingPayment', JSON.stringify({
+        label: currentOrder.label,
+        nominal: uniqueNominal,
+        waLink: waLink,
+        savedAt: Date.now()
+      }));
+    } catch(e) { /* localStorage gak tersedia, lewati */ }
+
+    // Catat juga ke riwayat transaksi (daftar permanen di perangkat ini)
+    saveToRiwayat({
+      id: trxId,
+      label: currentOrder.label,
+      nominal: uniqueNominal,
+      waLink: waLink,
+      confirmed: false,
+      createdAt: Date.now()
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  //  RIWAYAT TRANSAKSI — tersimpan di perangkat (localStorage)
+  // ════════════════════════════════════════════════
+  function getRiwayat(){
+    try { return JSON.parse(localStorage.getItem('riwayatTransaksi') || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveToRiwayat(item){
+    try {
+      const list = getRiwayat();
+      list.unshift(item); // terbaru di atas
+      localStorage.setItem('riwayatTransaksi', JSON.stringify(list.slice(0, 50))); // simpan maks 50
+    } catch(e) { /* localStorage gak tersedia, lewati */ }
+  }
+  function markRiwayatConfirmed(trxId){
+    try {
+      const list = getRiwayat();
+      const item = list.find(t => t.id === trxId);
+      if (item) item.confirmed = true;
+      localStorage.setItem('riwayatTransaksi', JSON.stringify(list));
+      renderRiwayat();
+    } catch(e) {}
+  }
+  function renderRiwayat(){
+    const wrap = document.getElementById('riwayatList');
+    const empty = document.getElementById('riwayatEmptyState');
+    if (!wrap) return;
+    const list = getRiwayat();
+    wrap.innerHTML = '';
+    if (!list.length) {
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    list.forEach(item => {
+      const tgl = new Date(item.createdAt).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) +
+                  ' ' + new Date(item.createdAt).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+      const card = document.createElement('div');
+      card.style = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;';
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:'Sora',sans-serif;font-size:0.88rem;font-weight:700;">${escHtml(item.label||'Pesanan')}</div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:2px;">${tgl}</div>
+          </div>
+          <span style="flex-shrink:0;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:6px;${item.confirmed ? 'background:rgba(34,197,94,0.15);color:#22c55e;' : 'background:rgba(255,184,77,0.15);color:#ffb84d;'}">${item.confirmed ? '✅ Dikonfirmasi' : '⏳ Belum konfirmasi'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:0.95rem;color:var(--accent);">Rp${(item.nominal||0).toLocaleString('id-ID')}</span>
+          ${!item.confirmed ? `<a href="${escAttr(item.waLink||'#')}" target="_blank" onclick="markRiwayatConfirmed('${item.id}')" style="background:#22c55e;color:#fff;text-decoration:none;font-size:0.76rem;font-weight:700;padding:7px 13px;border-radius:9px;">💬 Konfirmasi WA</a>` : ''}
+        </div>
+      `;
+      wrap.appendChild(card);
+    });
+  }
+
+  function clearPendingPayment(){
+    try { localStorage.removeItem('pendingPayment'); } catch(e) {}
+    hidePendingPaymentBanner();
+  }
+
+  function hidePendingPaymentBanner(){
+    const el = document.getElementById('pendingPaymentBanner');
+    if (el) el.style.display = 'none';
+  }
+
+  // Cek kalau ada pesanan yang belum dikonfirmasi via WA (maksimal 24 jam terakhir),
+  // tampilkan banner pengingat di halaman Beranda
+  function checkPendingPayment(){
+    let data;
+    try { data = JSON.parse(localStorage.getItem('pendingPayment') || 'null'); } catch(e) { data = null; }
+    if (!data || !data.waLink) return;
+    const umurJam = (Date.now() - (data.savedAt || 0)) / 3600000;
+    if (umurJam > 24) { clearPendingPayment(); return; }
+
+    const banner = document.getElementById('pendingPaymentBanner');
+    if (!banner) return;
+    document.getElementById('pendingPaymentLabel').textContent = data.label || 'Pesanan kamu';
+    document.getElementById('pendingPaymentNominal').textContent = 'Rp' + (data.nominal||0).toLocaleString('id-ID');
+    document.getElementById('pendingPaymentWaBtn').href = data.waLink;
+    banner.style.display = 'flex';
   }
 
   // ---- Loading screen (versi C — Layered Depth) ----
@@ -2774,17 +2888,19 @@
   let prodExtra = []; // cache kartu produk tambahan
   let publicExtraProducts = []; // cache produk tambahan versi publik (untuk popup detail)
   let smmBannerIcon = ''; // cache link foto ikon banner Suntik Sosmed
+  let smmPlatforms = []; // [{id, nama, icon, layanan:[{id,nama,deskripsi,hargaPer1000,minQty,butuhCatatan}]}]
 
   // Pisahkan record JSONBin (objek baru {announcements, main, extra} ATAU array lama) jadi 3 bagian
   function parseBinRecord(record){
     if (Array.isArray(record)) {
-      return { announcements: record, main: null, extra: [], smmBannerIcon: '' };
+      return { announcements: record, main: null, extra: [], smmBannerIcon: '', smm: [] };
     }
     return {
       announcements: (record && record.announcements) || [],
       main: (record && record.main) || null,
       extra: (record && record.extra) || [],
-      smmBannerIcon: (record && record.smmBannerIcon) || ''
+      smmBannerIcon: (record && record.smmBannerIcon) || '',
+      smm: (record && record.smm) || []
     };
   }
 
@@ -2797,19 +2913,20 @@
   }
 
   // Render ikon: kalau berupa URL gambar, tampilkan <img>; kalau bukan, tampilkan sebagai emoji/teks
-  function renderProdIcon(icon, sizePx){
+  function renderProdIcon(icon, sizePx, fallback){
     const val = (icon || '').trim();
+    const fb = fallback || '🛍️';
     const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
     if (isUrl) {
-      return '<img src="' + escAttr(val) + '" style="width:' + sizePx + 'px;height:' + sizePx + 'px;object-fit:cover;" onerror="this.parentElement.textContent=\'📈\'">';
+      return '<img src="' + escAttr(val) + '" style="width:' + sizePx + 'px;height:' + sizePx + 'px;object-fit:cover;border-radius:14px;" onerror="this.outerHTML=\'' + fb + '\'">';
     }
-    return escHtml(val || '📈');
+    return escHtml(val || fb);
   }
 
   function applySmmBannerIcon(icon){
     smmBannerIcon = icon || '';
     const el = document.getElementById('smmBannerIcon');
-    if (el) el.innerHTML = renderProdIcon(smmBannerIcon, 42);
+    if (el) el.innerHTML = renderProdIcon(smmBannerIcon, 42, '📈');
   }
 
   // Fetch data dari JSONBin dan tampilkan feed kalau ada item
@@ -2824,6 +2941,8 @@
       if (parsed.main) renderPublicMainCard(parsed.main);
       renderPublicExtraProducts(parsed.extra);
       applySmmBannerIcon(parsed.smmBannerIcon);
+      smmPlatforms = parsed.smm;
+      renderSmmStorefront();
       if (parsed.announcements.length) tampilAnnFeed(parsed.announcements);
     } catch(e) { /* Gagal fetch → tampilan default tetap dipakai */ }
   }
@@ -2893,7 +3012,7 @@
         : `<button class="buy-btn" onclick="openProductDetailExtra(${idx})">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>`;
       card.innerHTML = `
         <div class="product-header" style="cursor:pointer;${isHabis ? 'opacity:0.6;' : ''}" onclick="openProductDetailExtra(${idx})">
-          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;">${escHtml(p.icon || '🛍️')}</div>
+          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;overflow:hidden;">${renderProdIcon(p.icon, 54)}</div>
           <h2>${escHtml(p.nama || 'Nama Produk')}</h2>
           <div class="sub">${escHtml(p.sub || '')}</div>
         </div>
@@ -2989,7 +3108,7 @@
     const labelProduk = p.nama || 'Produk';
     const { isHabis } = getStokInfo(p);
     openProductDetail({
-      iconHtml: escHtml(p.icon || '🛍️'),
+      iconHtml: renderProdIcon(p.icon, 64),
       title: p.nama || 'Nama Produk',
       sub: p.sub || '',
       desc: p.deskripsi || '',
@@ -3047,7 +3166,7 @@
     // Sengaja tidak disimpan ke localStorage — pop-up akan tetap muncul lagi tiap web dibuka ulang.
   }
 
-  window.addEventListener('load', initAnn);
+  window.addEventListener('load', function(){ renderSmmStorefront(); initAnn(); checkPendingPayment(); });
 
   // ════════════════════════════════════════════════
   //  ADMIN PANEL — buka via URL ?manage
@@ -3189,23 +3308,27 @@
     }
     prodExtra.forEach((p, idx) => {
       const card = document.createElement('div');
+      card.id = 'adProdCard' + idx;
       card.style = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;';
+      const katLabel = {apk:'📱 Apk Premium', tutorial:'📚 Tutorial', smm:'📈 SMM Panel', lainnya:'✨ Lainnya'}[p.kategori || 'apk'] || '📱 Apk Premium';
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span style="font-size:0.78rem;color:var(--muted);">Kartu Produk #${idx+1}</span>
+          <span style="font-size:0.78rem;color:var(--muted);">Kartu Produk #${idx+1} &middot; <span id="adKatBadge${idx}" style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;">${katLabel}</span></span>
           <button type="button" onclick="adRemoveProduct(${idx})" style="background:none;border:none;color:#fc5ca0;font-size:0.78rem;cursor:pointer;font-family:inherit;">🗑️ Hapus</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:10px;">
-          <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Ikon (emoji)</label>
-            <input type="text" value="${escAttr(p.icon||'🛍️')}" oninput="adUpdateProduct(${idx},'icon',this.value)"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+        <div style="margin-bottom:10px;">
+          <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Foto Produk (link gambar)</label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <img id="adIconPrev${idx}" src="${escAttr(p.icon||'')}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--surface);border:1px solid var(--border);${/^(https?:)?\/\//.test((p.icon||'').trim())||/^data:image\//.test((p.icon||'').trim())?'':'display:none;'}" onerror="this.style.display='none';">
+            <input type="text" value="${escAttr(p.icon||'')}" oninput="adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});" placeholder="https://contoh.com/gambar.jpg"
+              style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
           </div>
-          <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Nama Produk</label>
-            <input type="text" value="${escAttr(p.nama||'')}" oninput="adUpdateProduct(${idx},'nama',this.value)" placeholder="Nama produk"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
-          </div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-top:3px;">Tempel link gambar (URL, misal dari Catbox). Kosongkan untuk pakai ikon default 🛍️</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Nama Produk</label>
+          <input type="text" value="${escAttr(p.nama||'')}" oninput="adUpdateProduct(${idx},'nama',this.value)" placeholder="Nama produk"
+            style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
           <div>
@@ -3215,7 +3338,7 @@
           </div>
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Kategori</label>
-            <select onchange="adUpdateProduct(${idx},'kategori',this.value)"
+            <select onchange="adUpdateProduct(${idx},'kategori',this.value); adRefreshKategoriBadge(${idx});"
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
               <option value="apk" ${(p.kategori||'apk')==='apk'?'selected':''}>📱 Apk Premium</option>
               <option value="tutorial" ${p.kategori==='tutorial'?'selected':''}>📚 Tutorial</option>
@@ -3267,6 +3390,26 @@
   function adUpdateProduct(idx, field, value){
     if (!prodExtra[idx]) return;
     prodExtra[idx][field] = value;
+  }
+
+  function adRefreshKategoriBadge(idx){
+    const badge = document.getElementById('adKatBadge' + idx);
+    if (!badge || !prodExtra[idx]) return;
+    const katLabel = {apk:'📱 Apk Premium', tutorial:'📚 Tutorial', smm:'📈 SMM Panel', lainnya:'✨ Lainnya'}[prodExtra[idx].kategori || 'apk'] || '📱 Apk Premium';
+    badge.textContent = katLabel;
+  }
+
+  function adRefreshIconPreview(idx){
+    const img = document.getElementById('adIconPrev' + idx);
+    if (!img || !prodExtra[idx]) return;
+    const val = (prodExtra[idx].icon || '').trim();
+    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
+    if (isUrl) {
+      img.src = val;
+      img.style.display = '';
+    } else {
+      img.style.display = 'none';
+    }
   }
 
   function adRemoveProduct(idx){
@@ -3467,11 +3610,194 @@
     banner.style.opacity = '0';
   }
 
-  function switchSmmTab(platform){
-    document.querySelectorAll('.smm-tab').forEach(t=>t.classList.remove('active'));
-    document.querySelector('.smm-tab[data-platform="'+platform+'"]').classList.add('active');
-    document.querySelectorAll('.smm-platform-group').forEach(g=>g.classList.remove('active'));
-    document.getElementById('smm-group-'+platform).classList.add('active');
+  // ════════════════════════════════════════════════
+  //  SUNTIK SOSMED — render platform/layanan dinamis dari data admin
+  // ════════════════════════════════════════════════
+  let smmActivePlatformId = null;
+  let smmModalPlatform = null;
+  let smmModalSelections = {}; // { layananId: { checked, qty, note } }
+
+  function renderSmmStorefront(){
+    const tabsWrap = document.getElementById('smmPlatformTabs');
+    const groupsWrap = document.getElementById('smmPlatformGroups');
+    const emptyState = document.getElementById('smmEmptyState');
+    if (!tabsWrap || !groupsWrap) return;
+    tabsWrap.innerHTML = '';
+    groupsWrap.innerHTML = '';
+
+    if (!smmPlatforms.length) {
+      tabsWrap.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+    tabsWrap.style.display = 'flex';
+    if (emptyState) emptyState.style.display = 'none';
+
+    if (!smmActivePlatformId || !smmPlatforms.find(p=>p.id===smmActivePlatformId)) {
+      smmActivePlatformId = smmPlatforms[0].id;
+    }
+
+    smmPlatforms.forEach(plat => {
+      const tab = document.createElement('div');
+      tab.className = 'smm-tab' + (plat.id===smmActivePlatformId ? ' active' : '');
+      tab.textContent = (plat.icon || '📷') + ' ' + (plat.nama || 'Platform');
+      tab.onclick = () => { smmActivePlatformId = plat.id; renderSmmStorefront(); };
+      tabsWrap.appendChild(tab);
+
+      if (plat.id !== smmActivePlatformId) return;
+      const group = document.createElement('div');
+      group.className = 'smm-platform-group active';
+      if (!plat.layanan || !plat.layanan.length) {
+        group.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.82rem;padding:30px 0;">Belum ada layanan untuk platform ini.</div>';
+      } else {
+        plat.layanan.forEach(lay => {
+          const card = document.createElement('div');
+          card.className = 'smm-service-card';
+          card.innerHTML = `
+            <div class="smm-service-info">
+              <h4>${escHtml(lay.nama || 'Layanan')}</h4>
+              ${lay.deskripsi ? `<p class="smm-service-desc">${escHtml(lay.deskripsi)}</p>` : ''}
+              <p class="smm-service-unit-price">Rp${(lay.hargaPer1000||0).toLocaleString('id-ID')} / 1000</p>
+            </div>
+            <div class="smm-service-right">
+              <button class="smm-buy-btn" onclick="openSmmOrderModal('${plat.id}')">Pesan</button>
+            </div>
+          `;
+          group.appendChild(card);
+        });
+      }
+      groupsWrap.appendChild(group);
+    });
+  }
+
+  function openSmmOrderModal(platformId){
+    const plat = smmPlatforms.find(p=>p.id===platformId);
+    if (!plat) return;
+    smmModalPlatform = plat;
+    smmModalSelections = {};
+    document.getElementById('smmModalPlatformName').textContent = (plat.icon||'📷') + ' ' + (plat.nama||'Platform');
+    document.getElementById('smmModalTarget').value = '';
+    renderSmmModalServices();
+    updateSmmModalTotal();
+    document.getElementById('smmOrderOverlay').classList.add('open');
+  }
+  function closeSmmOrderModal(){
+    document.getElementById('smmOrderOverlay').classList.remove('open');
+  }
+
+  function renderSmmModalServices(){
+    const wrap = document.getElementById('smmServiceCheckList');
+    wrap.innerHTML = '';
+    if (!smmModalPlatform || !smmModalPlatform.layanan) return;
+    smmModalPlatform.layanan.forEach(lay => {
+      smmModalSelections[lay.id] = smmModalSelections[lay.id] || { checked:false, qty: lay.minQty || 1000, note:'' };
+      const sel = smmModalSelections[lay.id];
+      const item = document.createElement('div');
+      item.className = 'smm-check-item' + (sel.checked ? ' checked' : '');
+      item.id = 'smmCheckItem_' + lay.id;
+      item.innerHTML = `
+        <label class="smm-check-head">
+          <input type="checkbox" ${sel.checked?'checked':''} onchange="toggleSmmService('${lay.id}', this.checked)">
+          <div style="flex:1;">
+            <div class="smm-check-name">${escHtml(lay.nama || 'Layanan')}</div>
+            <div class="smm-check-price">Rp${(lay.hargaPer1000||0).toLocaleString('id-ID')} / 1000${lay.deskripsi ? ' · ' + escHtml(lay.deskripsi) : ''}</div>
+          </div>
+        </label>
+        <div class="smm-check-body">
+          <div class="smm-qty-row">
+            <label>Jumlah</label>
+            <input type="number" min="${lay.minQty||1}" step="1" value="${sel.qty}" oninput="updateSmmQty('${lay.id}', this.value)">
+          </div>
+          <div class="smm-line-total" id="smmLineTotal_${lay.id}">Rp${calcSmmLineTotal(lay, sel.qty).toLocaleString('id-ID')}</div>
+          ${lay.butuhCatatan ? `
+          <div class="smm-check-note-wrap">
+            <label>Catatan (wajib diisi)</label>
+            <textarea rows="2" placeholder="Contoh: isi komentar yang diinginkan" oninput="updateSmmNote('${lay.id}', this.value)">${escHtml(sel.note||'')}</textarea>
+          </div>` : ''}
+        </div>
+      `;
+      wrap.appendChild(item);
+    });
+  }
+
+  function calcSmmLineTotal(lay, qty){
+    const q = Math.max(0, parseInt(qty, 10) || 0);
+    return Math.round((lay.hargaPer1000||0) * (q/1000));
+  }
+
+  function toggleSmmService(layId, checked){
+    if (!smmModalSelections[layId]) return;
+    smmModalSelections[layId].checked = checked;
+    const item = document.getElementById('smmCheckItem_' + layId);
+    if (item) item.classList.toggle('checked', checked);
+    updateSmmModalTotal();
+  }
+  function updateSmmQty(layId, val){
+    if (!smmModalSelections[layId]) return;
+    smmModalSelections[layId].qty = val;
+    const lay = smmModalPlatform.layanan.find(l=>l.id===layId);
+    const lineEl = document.getElementById('smmLineTotal_' + layId);
+    if (lineEl && lay) lineEl.textContent = 'Rp' + calcSmmLineTotal(lay, val).toLocaleString('id-ID');
+    updateSmmModalTotal();
+  }
+  function updateSmmNote(layId, val){
+    if (!smmModalSelections[layId]) return;
+    smmModalSelections[layId].note = val;
+  }
+  function updateSmmModalTotal(){
+    let total = 0;
+    if (smmModalPlatform && smmModalPlatform.layanan) {
+      smmModalPlatform.layanan.forEach(lay => {
+        const sel = smmModalSelections[lay.id];
+        if (sel && sel.checked) total += calcSmmLineTotal(lay, sel.qty);
+      });
+    }
+    const totalEl = document.getElementById('smmModalTotal');
+    if (totalEl) totalEl.textContent = 'Rp' + total.toLocaleString('id-ID');
+    return total;
+  }
+
+  function proceedSmmOrder(){
+    const target = document.getElementById('smmModalTarget').value.trim();
+    if (!target) { alert('Isi link atau username sosial media dulu ya'); return; }
+    if (!smmModalPlatform) return;
+
+    const chosen = smmModalPlatform.layanan.filter(lay => smmModalSelections[lay.id] && smmModalSelections[lay.id].checked);
+    if (!chosen.length) { alert('Pilih minimal 1 layanan dulu ya'); return; }
+
+    // Validasi catatan wajib utk layanan yang butuh catatan
+    for (const lay of chosen) {
+      if (lay.butuhCatatan) {
+        const note = (smmModalSelections[lay.id].note || '').trim();
+        if (!note) {
+          alert('Layanan "' + lay.nama + '" butuh catatan, isi dulu ya');
+          return;
+        }
+      }
+    }
+
+    const total = updateSmmModalTotal();
+    const labelParts = chosen.map(lay => {
+      const sel = smmModalSelections[lay.id];
+      const q = Math.max(0, parseInt(sel.qty,10) || 0);
+      return lay.nama + ' ' + q.toLocaleString('id-ID');
+    });
+    const label = (smmModalPlatform.icon||'') + ' ' + smmModalPlatform.nama + ' — ' + labelParts.join(', ');
+
+    const detailLines = chosen.map(lay => {
+      const sel = smmModalSelections[lay.id];
+      const q = Math.max(0, parseInt(sel.qty,10) || 0);
+      const lineTotal = calcSmmLineTotal(lay, q);
+      let line = '• ' + lay.nama + ' x' + q.toLocaleString('id-ID') + ' = Rp' + lineTotal.toLocaleString('id-ID');
+      if (lay.butuhCatatan && sel.note) line += ' (catatan: ' + sel.note + ')';
+      return line;
+    });
+
+    closeSmmOrderModal();
+    openOrderModal(label, total, 'smm');
+    currentOrder.target = target;
+    currentOrder.smmDetail = detailLines.join('\n');
+    document.getElementById('custTarget').value = target;
   }
 
   // ---- Pencarian & filter kategori produk di halaman Beranda ----
@@ -3508,6 +3834,7 @@
     document.querySelector('.nav-link[data-page="'+id+'"]').classList.add('active');
     closeMobileMenu();
     window.scrollTo({top:0, behavior:'smooth'});
+    if (id === 'riwayat') renderRiwayat();
   }
 </script>
 
