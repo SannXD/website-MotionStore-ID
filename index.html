@@ -1691,14 +1691,26 @@
   <div class="page active" id="page-home">
 
     <!-- Banner pengingat pesanan belum dikonfirmasi (muncul otomatis kalau ada) -->
-    <div id="pendingPaymentBanner" style="display:none;align-items:center;gap:12px;margin:12px 16px 0;padding:13px 14px;border-radius:14px;background:rgba(255,184,77,0.12);border:1px solid rgba(255,184,77,0.35);">
-      <span style="font-size:1.4rem;flex-shrink:0;">⏳</span>
-      <span style="flex:1;min-width:0;">
-        <strong style="display:block;font-size:0.85rem;color:#ffb84d;font-family:'Sora',sans-serif;">Pesanan belum dikonfirmasi</strong>
-        <span style="display:block;font-size:0.76rem;color:var(--muted);margin-top:2px;" id="pendingPaymentLabel">Pesanan kamu</span>
-        <span style="display:block;font-size:0.76rem;color:var(--muted);">Total: <span id="pendingPaymentNominal">Rp0</span></span>
-      </span>
-      <a id="pendingPaymentWaBtn" href="#" target="_blank" onclick="clearPendingPayment()" style="flex-shrink:0;background:#22c55e;color:#fff;text-decoration:none;font-size:0.78rem;font-weight:700;padding:9px 14px;border-radius:10px;white-space:nowrap;">💬 Lanjut WA</a>
+    <!-- Popup pengingat pesanan belum dikonfirmasi (muncul di tengah layar) -->
+    <style>
+      @keyframes ppopIn {
+        from { opacity:0; transform:scale(0.85) translateY(20px); }
+        to   { opacity:1; transform:scale(1) translateY(0); }
+      }
+    </style>
+    <div id="pendingPaymentBanner" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
+      <div style="background:#14141f;border:1px solid rgba(255,184,77,0.4);border-radius:20px;padding:28px 24px;max-width:340px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.6);animation:ppopIn .35s cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="text-align:center;font-size:2.8rem;margin-bottom:12px;">⏳</div>
+        <h3 style="font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:800;color:#ffb84d;text-align:center;margin-bottom:6px;">Pesanan Belum Dikonfirmasi!</h3>
+        <p style="font-size:0.82rem;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:16px;">Kamu punya pesanan yang belum dikirim ke admin. Segera konfirmasi via WhatsApp supaya pesanan diproses.</p>
+        <div style="background:rgba(255,184,77,0.08);border:1px solid rgba(255,184,77,0.2);border-radius:12px;padding:12px 14px;margin-bottom:18px;">
+          <span style="display:block;font-size:0.78rem;color:var(--muted);margin-bottom:2px;">Produk</span>
+          <strong style="display:block;font-size:0.88rem;color:var(--text);font-family:'Sora',sans-serif;" id="pendingPaymentLabel">Pesanan kamu</strong>
+          <span style="display:block;font-size:0.82rem;color:#ffb84d;font-weight:700;margin-top:4px;">Total: <span id="pendingPaymentNominal">Rp0</span></span>
+        </div>
+        <a id="pendingPaymentWaBtn" href="#" target="_blank" onclick="clearPendingPayment()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#22c55e;color:#fff;text-decoration:none;font-size:0.92rem;font-weight:700;padding:13px;border-radius:12px;margin-bottom:10px;">💬 Konfirmasi via WhatsApp</a>
+        <button onclick="clearPendingPayment()" style="display:block;width:100%;background:none;border:none;color:var(--muted);font-size:0.8rem;font-family:inherit;cursor:pointer;padding:6px;">Tutup / Nanti saja</button>
+      </div>
     </div>
 
     <section class="hero">
@@ -2161,6 +2173,14 @@
           <label>Nomor WhatsApp</label>
           <input type="text" id="custWA" placeholder="08xxxxxxxxxx">
         </div>
+        <div class="inp-group" id="promoFieldWrap">
+          <label>Kode Promo <span style="font-size:0.75rem;color:var(--muted);font-weight:400;">(opsional)</span></label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="custPromo" placeholder="Masukkan kode promo" style="text-transform:uppercase;flex:1;" oninput="this.value=this.value.toUpperCase()">
+            <button type="button" onclick="applyPromo()" style="background:linear-gradient(90deg,#7c5cfc,#fc5ca0);color:#fff;border:none;padding:0 16px;border-radius:10px;font-size:0.85rem;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;">Pakai</button>
+          </div>
+          <div id="promoMsg" style="font-size:0.78rem;margin-top:6px;display:none;"></div>
+        </div>
         <button class="next-btn" onclick="goToPayment()">Lanjut ke Pembayaran</button>
       </div>
     </div>
@@ -2175,6 +2195,10 @@
       <div class="qris-wrap">
 
         <!-- Nominal -->
+        <div id="promoDiscountRow" style="display:none;justify-content:center;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.78rem;color:var(--muted);text-decoration:line-through;" id="promoOriginalPrice"></span>
+          <span style="font-size:0.75rem;background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);padding:2px 8px;border-radius:20px;font-weight:700;" id="promoDiscountAmt"></span>
+        </div>
         <div class="amount-badge" id="amountBadge">Rp2.000</div>
         <div class="nominal-unique" id="nominalUniqueNote" style="display:none;">Bayar sesuai nominal di atas (termasuk kode unik), jangan dibulatkan</div>
 
@@ -2269,10 +2293,36 @@
   const JSONBIN_MASTER_KEY = '$2a$10$x0Htrrp0A2saMdZIklxrV.gsIep2bRScCw08EvfYAZMOW1xbFzG9G';   // Master Key — dipakai HANYA di panel admin (?manage) untuk SIMPAN data
   const ADMIN_PASS  = 'ganti-password-ini-123';     // ← WAJIB ganti sebelum publish
   //
+  // ╠══════════════════════════════════════════════════════════════╣
+  // ║   KONFIGURASI NOTIFIKASI TELEGRAM (OPSIONAL)                ║
+  // ╠══════════════════════════════════════════════════════════════╣
+  //  Cara setup:
+  //  1. Chat @BotFather di Telegram → /newbot → salin TOKEN
+  //  2. Chat bot kamu, lalu buka: https://api.telegram.org/bot<TOKEN>/getUpdates
+  //     Salin "id" dari bagian "chat" — itu CHAT_ID admin kamu
+  //  3. Isi TOKEN dan CHAT_ID di bawah ini, lalu upload ulang
+  //
+  const TELEGRAM_BOT_TOKEN = '8419390326:AAFyTsqPWX0I4c7YtSUiuT8wUX_qLAqrADU';
+  const TELEGRAM_CHAT_ID   = '6739584794';
+  //
   // ╚══════════════════════════════════════════════════════════════╝
 
   // ---- Order modal: state ----
   const ADMIN_WA = '6285796640135';
+
+  // ╔══════════════════════════════════════════════════════════════╗
+  // ║        KONFIGURASI KODE PROMO                               ║
+  // ╠══════════════════════════════════════════════════════════════╣
+  //  Format: { kode: 'KODEMU', diskon: 1000, berlakuHingga: 'YYYY-MM-DDTHH:MM:SS' }
+  //  berlakuHingga = tanggal & jam kode promo kedaluwarsa (waktu lokal HP kamu)
+  //  Contoh berlaku 1 hari dari sekarang: '2025-06-24T23:59:59'
+  //  Bisa isi lebih dari 1 kode promo — tambah objek baru di dalam array
+  //
+  const KODE_PROMO = [
+    { kode: 'DISKON1000', diskon: 1000, berlakuHingga: '2025-06-24T23:59:59' },
+    // { kode: 'PROMO500',  diskon: 500,  berlakuHingga: '2025-06-25T23:59:59' },
+  ];
+  // ╚══════════════════════════════════════════════════════════════╝
   let countdownInterval = null;
   let uniqueNominal = 2000;
   let qrInstance = null;
@@ -2367,6 +2417,12 @@
     document.getElementById('custWA').value = '';
     document.getElementById('custTarget').value = '';
     document.getElementById('custBuyerEmail').value = '';
+    document.getElementById('custPromo').value = '';
+    activePromo = null;
+    const pm = document.getElementById('promoMsg');
+    if (pm) { pm.style.display='none'; pm.textContent=''; }
+    const dr = document.getElementById('promoDiscountRow');
+    if (dr) dr.style.display='none';
 
     const targetWrap = document.getElementById('targetFieldWrap');
     if (currentOrder.type === 'smm') {
@@ -2398,6 +2454,63 @@
     document.getElementById('orderStep3').style.display = n===3 ? 'block' : 'none';
   }
 
+  // ── State kode promo yang sedang aktif ──
+  let activePromo = null; // { kode, diskon }
+
+  function applyPromo(){
+    const input = document.getElementById('custPromo').value.trim().toUpperCase();
+    const msgEl = document.getElementById('promoMsg');
+    msgEl.style.display = 'block';
+    activePromo = null;
+
+    if (!input) {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = '❌ Masukkan kode promo dulu ya';
+      updatePromoPreview();
+      return;
+    }
+
+    const now = new Date();
+    const found = KODE_PROMO.find(p => p.kode.toUpperCase() === input);
+
+    if (!found) {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = '❌ Kode promo tidak ditemukan';
+      updatePromoPreview();
+      return;
+    }
+
+    const exp = new Date(found.berlakuHingga);
+    if (now > exp) {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = '❌ Kode promo sudah kedaluwarsa';
+      updatePromoPreview();
+      return;
+    }
+
+    // Promo valid!
+    activePromo = found;
+    msgEl.style.color = '#22c55e';
+    msgEl.textContent = '✅ Kode promo berhasil! Hemat Rp' + found.diskon.toLocaleString('id-ID');
+    updatePromoPreview();
+  }
+
+  function updatePromoPreview(){
+    const el = document.getElementById('promoDiscountRow');
+    if (!el) return;
+    if (activePromo) {
+      el.style.display = 'flex';
+      document.getElementById('promoDiscountAmt').textContent = '- Rp' + activePromo.diskon.toLocaleString('id-ID');
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  function getFinalPrice(){
+    const disc = activePromo ? activePromo.diskon : 0;
+    return Math.max(1, currentOrder.basePrice - disc);
+  }
+
   function goToPayment(){
     const name = document.getElementById('custName').value.trim();
     const wa = document.getElementById('custWA').value.trim();
@@ -2423,8 +2536,19 @@
     } else {
       currentOrder.buyerEmail = '';
     }
-    uniqueNominal = currentOrder.basePrice + Math.floor(Math.random()*89 + 1); // kode unik utk verifikasi manual
+    uniqueNominal = getFinalPrice() + Math.floor(Math.random()*89 + 1); // kode unik utk verifikasi manual
     document.getElementById('amountBadge').textContent = 'Rp' + uniqueNominal.toLocaleString('id-ID');
+    // Tampilkan info diskon promo di step 2
+    const discRow = document.getElementById('promoDiscountRow');
+    const origEl  = document.getElementById('promoOriginalPrice');
+    const discEl  = document.getElementById('promoDiscountAmt');
+    if (activePromo && discRow && origEl && discEl) {
+      origEl.textContent = 'Rp' + currentOrder.basePrice.toLocaleString('id-ID');
+      discEl.textContent = '- Rp' + activePromo.diskon.toLocaleString('id-ID');
+      discRow.style.display = 'flex';
+    } else if (discRow) {
+      discRow.style.display = 'none';
+    }
     // Sync DANA amount hint
     const danaHint = document.getElementById('danaAmountHint');
     if (danaHint) danaHint.textContent = 'Rp' + uniqueNominal.toLocaleString('id-ID');
@@ -2464,7 +2588,7 @@
     }, 1000);
   }
   function restartTimer(){
-    uniqueNominal = currentOrder.basePrice + Math.floor(Math.random()*89 + 1);
+    uniqueNominal = getFinalPrice() + Math.floor(Math.random()*89 + 1);
     document.getElementById('amountBadge').textContent = 'Rp' + uniqueNominal.toLocaleString('id-ID');
     renderQris(uniqueNominal);
     startTimer();
@@ -2506,6 +2630,26 @@
     document.getElementById('qrisStaticImg').classList.toggle('zoomed');
   }
 
+  // ════════════════════════════════════════════════
+  //  NOTIFIKASI TELEGRAM OTOMATIS KE ADMIN
+  //  Dikirim di background saat pembeli klik "Saya Sudah Bayar"
+  // ════════════════════════════════════════════════
+  async function sendTelegramNotif(pesanTelegram){
+    if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'ISI_TOKEN_BOT_KAMU') return;
+    if (!TELEGRAM_CHAT_ID   || TELEGRAM_CHAT_ID   === 'ISI_CHAT_ID_ADMIN')  return;
+    try {
+      await fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: pesanTelegram,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch(e) { /* Gagal kirim Telegram — tidak mengganggu alur pembeli */ }
+  }
+
   function confirmPaid(){
     const name = document.getElementById('custName').value.trim();
     const wa = document.getElementById('custWA').value.trim();
@@ -2524,9 +2668,37 @@
     if (currentOrder.type === 'am' && currentOrder.buyerEmail) {
       pesan += '\n📧 Email    : ' + currentOrder.buyerEmail;
     }
+    if (activePromo) {
+      pesan += '\n🎟️ Promo     : ' + activePromo.kode + ' (-Rp' + activePromo.diskon.toLocaleString('id-ID') + ')';
+    }
     pesan += '\n' + garis;
 
     pesan += '\n\nMohon dicek dan diaktifkan ya, terima kasih 🙏';
+
+    // ── Kirim notifikasi ke Telegram admin secara otomatis (background) ──
+    const tgl = new Date().toLocaleString('id-ID', {
+      day:'2-digit', month:'short', year:'numeric',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    let notifTelegram =
+      '🔔 *PESANAN MASUK — MotionStore ID*\n' +
+      '━━━━━━━━━━━━━━━━━━━━\n' +
+      '🛍️ *Produk*   : ' + currentOrder.label + '\n' +
+      '💰 *Total*    : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
+      '👤 *Nama*     : ' + name + '\n' +
+      '📱 *WA*       : ' + wa;
+    if (currentOrder.type === 'smm' && currentOrder.target) {
+      notifTelegram += '\n🎯 *Target*   : ' + currentOrder.target;
+    }
+    if (currentOrder.type === 'am' && currentOrder.buyerEmail) {
+      notifTelegram += '\n📧 *Email*    : ' + currentOrder.buyerEmail;
+    }
+    notifTelegram +=
+      '\n🕐 *Waktu*    : ' + tgl +
+      '\n━━━━━━━━━━━━━━━━━━━━\n' +
+      '⚠️ _Segera cek bukti transfer dari pembeli via WA!_';
+    sendTelegramNotif(notifTelegram);
+
     const waLink = 'https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(pesan);
     const waBtn = document.getElementById('waConfirmBtn');
     waBtn.href = waLink;
