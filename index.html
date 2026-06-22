@@ -805,38 +805,6 @@
   .pay-panel { display:none; }
   .pay-panel.active { display:block; animation:fadeSlideUp .3s ease both; }
 
-  /* DANA panel */
-  .dana-card {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:20px 18px; text-align:center;
-    display:flex; flex-direction:column; align-items:center; gap:12px;
-  }
-  .dana-badge {
-    display:inline-flex; align-items:center; gap:6px;
-    background:rgba(0,141,255,0.12); border:1px solid rgba(0,141,255,0.25);
-    color:#60b4ff; font-size:0.72rem; font-weight:700;
-    padding:4px 12px; border-radius:20px; letter-spacing:0.4px;
-  }
-  .dana-num-big {
-    font-size:1.4rem; font-weight:800; color:var(--text);
-    letter-spacing:1px; background:var(--surface);
-    border:1px solid var(--border); padding:12px 20px;
-    border-radius:12px; width:100%; text-align:center;
-  }
-  .dana-copy-btn {
-    width:100%; background:linear-gradient(90deg,#7c5cfc,#fc5ca0); color:#fff;
-    border:none; padding:12px; border-radius:10px;
-    font-size:0.9rem; font-weight:700; cursor:pointer; font-family:inherit;
-    transition:transform .2s, box-shadow .2s;
-  }
-  .dana-copy-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(124,92,252,0.4); }
-  .dana-copied-msg {
-    display:none; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3);
-    color:#4ade80; font-size:0.82rem; font-weight:600;
-    padding:8px 14px; border-radius:8px; text-align:center; width:100%;
-  }
-  .dana-info { font-size:0.75rem; color:var(--muted); line-height:1.6; }
-
   /* QRIS foto zoom */
   .qris-static-img {
     width:100%; max-width:200px; border-radius:10px;
@@ -1976,7 +1944,7 @@
         <button onclick="closeAdminPanel()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
       </div>
 
-      <div style="display:flex;gap:8px;margin-bottom:18px;">
+      <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
         <button type="button" id="adTabBtnAnn" onclick="adSwitchTab('ann')"
           style="flex:1;background:linear-gradient(135deg,#7c5cfc,#fc5ca0);color:#fff;border:none;padding:10px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">
           📢 Pengumuman
@@ -1984,6 +1952,10 @@
         <button type="button" id="adTabBtnProd" onclick="adSwitchTab('prod')"
           style="flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">
           🛍️ Kartu Produk
+        </button>
+        <button type="button" id="adTabBtnPromo" onclick="adSwitchTab('promo')"
+          style="flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">
+          🎟️ Kode Promo
         </button>
       </div>
 
@@ -2019,6 +1991,55 @@
           style="width:100%;background:var(--card);border:1.5px dashed var(--border);color:#a78bfa;padding:12px;border-radius:12px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;margin-bottom:18px;">
           + Tambah Kartu Produk Baru
         </button>
+      </div>
+
+      <!-- TAB: KODE PROMO -->
+      <div id="adTabPromo" style="display:none;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;">
+          <div style="font-size:0.8rem;font-weight:700;color:#a78bfa;margin-bottom:14px;">🎟️ Pengaturan Kode Promo</div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Kode Promo</label>
+            <input type="text" id="adPromoKode" placeholder="Contoh: MOTIONDISKON" oninput="this.value=this.value.toUpperCase()"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:8px;font-size:0.9rem;font-family:inherit;box-sizing:border-box;letter-spacing:1px;font-weight:700;">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Diskon (Rp)</label>
+              <input type="number" id="adPromoDiskon" placeholder="1000" min="0"
+                style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Berlaku Hingga</label>
+              <input type="date" id="adPromoBerlaku"
+                style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:6px;">Berlaku di Produk</label>
+            <div id="adPromoProducts" style="display:flex;flex-direction:column;gap:6px;">
+              <!-- di-generate JS -->
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Status</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" id="adPromoStatusOn" onclick="adSetPromoStatus(true)"
+                style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.15);color:#22c55e;font-family:inherit;font-weight:700;font-size:0.82rem;cursor:pointer;">
+                ✅ Aktif
+              </button>
+              <button type="button" id="adPromoStatusOff" onclick="adSetPromoStatus(false)"
+                style="flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:inherit;font-weight:700;font-size:0.82rem;cursor:pointer;">
+                ⏸️ Nonaktif
+              </button>
+            </div>
+          </div>
+
+          <div id="adPromoPreview" style="font-size:0.76rem;color:var(--muted);padding:10px;background:var(--surface);border-radius:8px;line-height:1.7;"></div>
+        </div>
       </div>
 
       <button id="adSaveBtn" onclick="saveAdminData()"
@@ -2209,11 +2230,6 @@
             <span class="tab-label">QRIS</span>
             <span class="tab-sub">Scan QR · semua e-wallet</span>
           </button>
-          <button class="pay-method-tab" id="tabDana" onclick="switchPayTab('dana')">
-            <span class="tab-icon">💳</span>
-            <span class="tab-label">DANA</span>
-            <span class="tab-sub">Transfer manual ke nomor DANA</span>
-          </button>
         </div>
 
         <!-- Panel QRIS -->
@@ -2229,17 +2245,6 @@
           </div>
           <p class="qris-note">Bisa dibayar via GoPay, OVO, ShopeePay, DANA, atau m-banking yang support QRIS.</p>
         </div>
-
-        <!-- Panel DANA -->
-        <div class="pay-panel" id="panelDana">
-          <div class="dana-card">
-            <div class="dana-badge">💙 DANA</div>
-            <div style="font-size:0.78rem;color:var(--muted);">Transfer ke nomor berikut:</div>
-            <div class="dana-num-big" id="danaNumberDisplay">08xxxxxxxxxx</div>
-            <button class="dana-copy-btn" onclick="copyDanaNumber()">📋 Salin Nomor DANA</button>
-            <div class="dana-copied-msg" id="danaCopiedMsg">✅ Nomor berhasil disalin!</div>
-            <div class="dana-info">Nominal transfer: <strong id="danaAmountHint">Rp2.000</strong><br>Jangan dibulatkan ya, gunakan nominal persis di atas.</div>
-          </div>
         </div>
 
         <!-- Peringatan bukti — mencolok, sebelum tombol -->
@@ -2318,10 +2323,8 @@
   //  Contoh berlaku 1 hari dari sekarang: '2025-06-24T23:59:59'
   //  Bisa isi lebih dari 1 kode promo — tambah objek baru di dalam array
   //
-  const KODE_PROMO = [
-    { kode: 'MOTIONDISKON', diskon: 1000, berlakuHingga: '2026-06-24T23:59:59' },
-  ];
   // ╚══════════════════════════════════════════════════════════════╝
+  // Kode promo dikelola via admin panel (?manage) — tersimpan di JSONBin
   let countdownInterval = null;
   let uniqueNominal = 2000;
   let qrInstance = null;
@@ -2409,6 +2412,7 @@
       currentOrder.label = label || 'Alight Motion Premium · 1 Tahun';
       currentOrder.basePrice = basePrice || 2000;
       currentOrder.type = type || 'am';
+      currentOrder.extraId = (type && type !== 'am' && type !== 'smm') ? type : '';
     }
 
     document.getElementById('modalProductLabel').textContent = currentOrder.label;
@@ -2456,6 +2460,95 @@
   // ── State kode promo yang sedang aktif ──
   let activePromo = null; // { kode, diskon }
 
+  // ── Data promo dari admin panel ──
+  let currentAdminPromo = {
+    kode: 'MOTIONDISKON',
+    diskon: 1000,
+    berlakuHingga: '2026-06-24',
+    aktif: true,
+    produk: ['am'] // 'am' = Alight Motion, atau id produk extra
+  };
+
+  // Load promo dari JSONBin ke runtime
+  function applyPromoFromAdmin(promo){
+    if (!promo) return;
+    currentAdminPromo = promo;
+  }
+
+  // Ambil daftar produk untuk checkbox admin promo
+  function getAllProdukOptions(){
+    const opts = [{ id: 'am', nama: 'Alight Motion Premium (Kartu Utama)' }];
+    (publicExtraProducts || []).forEach(p => {
+      if (p && p.id && p.nama) opts.push({ id: p.id, nama: p.nama });
+    });
+    return opts;
+  }
+
+  // Render tab promo di admin
+  function renderAdPromoTab(){
+    const p = currentAdminPromo;
+    document.getElementById('adPromoKode').value = p.kode || '';
+    document.getElementById('adPromoDiskon').value = p.diskon || 0;
+    document.getElementById('adPromoBerlaku').value = p.berlakuHingga || '';
+    adSetPromoStatus(p.aktif !== false);
+
+    // Render checkbox produk
+    const wrap = document.getElementById('adPromoProducts');
+    wrap.innerHTML = '';
+    getAllProdukOptions().forEach(opt => {
+      const checked = (p.produk || ['am']).includes(opt.id);
+      const label = document.createElement('label');
+      label.style = 'display:flex;align-items:center;gap:8px;font-size:0.84rem;color:var(--text);cursor:pointer;padding:8px 10px;background:var(--surface);border-radius:8px;border:1px solid var(--border);';
+      label.innerHTML = '<input type="checkbox" ' + (checked?'checked':'') + ' onchange="adTogglePromoProduk('' + opt.id + '',this.checked)" style="accent-color:#7c5cfc;width:15px;height:15px;"> ' + escHtml(opt.nama);
+      wrap.appendChild(label);
+    });
+    adUpdatePromoPreview();
+  }
+
+  function adSetPromoStatus(aktif){
+    currentAdminPromo.aktif = aktif;
+    document.getElementById('adPromoStatusOn').style.background  = aktif ? 'rgba(34,197,94,0.15)' : 'var(--surface)';
+    document.getElementById('adPromoStatusOn').style.color       = aktif ? '#22c55e' : 'var(--muted)';
+    document.getElementById('adPromoStatusOn').style.borderColor = aktif ? 'rgba(34,197,94,0.4)' : 'var(--border)';
+    document.getElementById('adPromoStatusOff').style.background  = !aktif ? 'rgba(239,68,68,0.15)' : 'var(--surface)';
+    document.getElementById('adPromoStatusOff').style.color       = !aktif ? '#ef4444' : 'var(--muted)';
+    document.getElementById('adPromoStatusOff').style.borderColor = !aktif ? 'rgba(239,68,68,0.4)' : 'var(--border)';
+    adUpdatePromoPreview();
+  }
+
+  function adTogglePromoProduk(id, checked){
+    const kode = document.getElementById('adPromoKode').value.trim().toUpperCase();
+    const diskon = parseInt(document.getElementById('adPromoDiskon').value) || 0;
+    const berlaku = document.getElementById('adPromoBerlaku').value;
+    currentAdminPromo = { ...currentAdminPromo, kode, diskon, berlakuHingga: berlaku };
+    if (!currentAdminPromo.produk) currentAdminPromo.produk = [];
+    if (checked) { if (!currentAdminPromo.produk.includes(id)) currentAdminPromo.produk.push(id); }
+    else { currentAdminPromo.produk = currentAdminPromo.produk.filter(x => x !== id); }
+    adUpdatePromoPreview();
+  }
+
+  function adUpdatePromoPreview(){
+    const kode = document.getElementById('adPromoKode') ? document.getElementById('adPromoKode').value.trim() : '';
+    const diskon = document.getElementById('adPromoDiskon') ? parseInt(document.getElementById('adPromoDiskon').value)||0 : 0;
+    const berlaku = document.getElementById('adPromoBerlaku') ? document.getElementById('adPromoBerlaku').value : '';
+    const aktif = currentAdminPromo.aktif !== false;
+    const produk = currentAdminPromo.produk || [];
+    const opts = getAllProdukOptions();
+    const namaProduk = produk.map(id => { const o = opts.find(x=>x.id===id); return o ? o.nama : id; }).join(', ') || '—';
+    const prev = document.getElementById('adPromoPreview');
+    if (prev) prev.innerHTML =
+      '<b>Preview:</b><br>' +
+      '🎟️ Kode: <b>' + escHtml(kode||'—') + '</b><br>' +
+      '💰 Diskon: <b>Rp' + diskon.toLocaleString('id-ID') + '</b><br>' +
+      '📅 Berlaku hingga: <b>' + (berlaku||'—') + '</b><br>' +
+      '🛍️ Produk: <b>' + escHtml(namaProduk) + '</b><br>' +
+      '🔘 Status: <b>' + (aktif ? '✅ Aktif' : '⏸️ Nonaktif') + '</b>';
+    // Sync ke currentAdminPromo
+    currentAdminPromo.kode = kode.toUpperCase();
+    currentAdminPromo.diskon = diskon;
+    currentAdminPromo.berlakuHingga = berlaku;
+  }
+
   function applyPromo(){
     const input = document.getElementById('custPromo').value.trim().toUpperCase();
     const msgEl = document.getElementById('promoMsg');
@@ -2469,19 +2562,29 @@
       return;
     }
 
-    const now = new Date();
-    const found = KODE_PROMO.find(p => p.kode.toUpperCase() === input);
+    const p = currentAdminPromo;
 
-    if (!found) {
+    // Cek kode cocok
+    if (!p || (p.kode || '').toUpperCase() !== input) {
       msgEl.style.color = '#ef4444';
       msgEl.textContent = '❌ Kode promo tidak ditemukan';
       updatePromoPreview();
       return;
     }
 
-    // Tambah +07:00 agar tanggal dibaca sebagai WIB bukan UTC
-    const expStr = found.berlakuHingga.includes('+') ? found.berlakuHingga : found.berlakuHingga + '+07:00';
-    const exp = new Date(expStr);
+    // Cek status aktif
+    if (p.aktif === false) {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = '❌ Kode promo sedang tidak aktif';
+      updatePromoPreview();
+      return;
+    }
+
+    // Cek tanggal berlaku (WIB)
+    const now = new Date();
+    const expStr = (p.berlakuHingga || '').includes('T') ? p.berlakuHingga : p.berlakuHingga + 'T23:59:59';
+    const expFull = expStr.includes('+') ? expStr : expStr + '+07:00';
+    const exp = new Date(expFull);
     if (now > exp) {
       msgEl.style.color = '#ef4444';
       msgEl.textContent = '❌ Kode promo sudah kedaluwarsa';
@@ -2489,10 +2592,28 @@
       return;
     }
 
+    // Cek apakah berlaku di produk ini
+    const produkBerlaku = p.produk || ['am'];
+    const produkSaatIni = currentOrder.type === 'am' ? 'am' : (currentOrder.extraId || '');
+    if (!produkBerlaku.includes(produkSaatIni) && !produkBerlaku.includes('am')) {
+      // cek lebih fleksibel: kalau produk ini ada di list
+      const match = produkBerlaku.some(id => {
+        if (id === 'am' && currentOrder.type === 'am') return true;
+        if (currentOrder.extraId && id === currentOrder.extraId) return true;
+        return false;
+      });
+      if (!match) {
+        msgEl.style.color = '#ef4444';
+        msgEl.textContent = '❌ Kode promo tidak berlaku untuk produk ini';
+        updatePromoPreview();
+        return;
+      }
+    }
+
     // Promo valid!
-    activePromo = found;
+    activePromo = { kode: p.kode, diskon: p.diskon };
     msgEl.style.color = '#22c55e';
-    msgEl.textContent = '✅ Kode promo berhasil! Hemat Rp' + found.diskon.toLocaleString('id-ID');
+    msgEl.textContent = '✅ Kode promo berhasil! Hemat Rp' + p.diskon.toLocaleString('id-ID');
     updatePromoPreview();
   }
 
@@ -2550,9 +2671,6 @@
     } else if (discRow) {
       discRow.style.display = 'none';
     }
-    // Sync DANA amount hint
-    const danaHint = document.getElementById('danaAmountHint');
-    if (danaHint) danaHint.textContent = 'Rp' + uniqueNominal.toLocaleString('id-ID');
     renderQris(uniqueNominal);
     // Reset ke tab QRIS setiap kali masuk step 2
     switchPayTab('qris');
@@ -2597,34 +2715,7 @@
 
   // ── PAYMENT TAB SWITCHER ──
   function switchPayTab(tab){
-    document.getElementById('tabQris').classList.toggle('active', tab==='qris');
-    document.getElementById('tabDana').classList.toggle('active', tab==='dana');
-    document.getElementById('panelQris').classList.toggle('active', tab==='qris');
-    document.getElementById('panelDana').classList.toggle('active', tab==='dana');
-    // Nominal note hanya relevan di QRIS
-    const noteEl = document.getElementById('nominalUniqueNote');
-    if (noteEl) noteEl.style.display = tab==='qris' ? 'block' : 'none';
-    // Repeat/timer hanya aktif di QRIS
-    document.getElementById('repeatBtn').style.display = tab==='qris' ? '' : 'none';
-  }
-
-  // ── DANA copy & QRIS foto zoom ──
-  function copyDanaNumber(){
-    const num = document.getElementById('danaNumberDisplay').innerText;
-    const ta = document.createElement('textarea');
-    ta.value = num;
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      const msg = document.getElementById('danaCopiedMsg');
-      msg.style.display = 'block';
-      msg.style.animation = 'none';
-      void msg.offsetWidth;
-      msg.style.animation = 'popin .3s ease forwards';
-      setTimeout(()=>{ msg.style.display = 'none'; }, 2400);
-    } catch(e) { alert('Gagal menyalin nomor'); }
-    document.body.removeChild(ta);
+    document.getElementById('tabQris').classList.toggle('active', tab==='qris');    document.getElementById('panelQris').classList.toggle('active', tab==='qris');    document.body.removeChild(ta);
   }
 
   function toggleQrisZoom(){
@@ -3073,7 +3164,8 @@
       main: (record && record.main) || null,
       extra: (record && record.extra) || [],
       smmBannerIcon: (record && record.smmBannerIcon) || '',
-      smm: (record && record.smm) || []
+      smm: (record && record.smm) || [],
+      promo: (record && record.promo) || null
     };
   }
 
@@ -3116,6 +3208,7 @@
       applySmmBannerIcon(parsed.smmBannerIcon);
       smmPlatforms = parsed.smm;
       renderSmmStorefront();
+      if (parsed.promo) applyPromoFromAdmin(parsed.promo);
       if (parsed.announcements.length) tampilAnnFeed(parsed.announcements);
     } catch(e) { /* Gagal fetch → tampilan default tetap dipakai */ }
   }
@@ -3385,6 +3478,7 @@
       prodMain = parsed.main || prodMain;
       prodExtra = parsed.extra;
       smmBannerIcon = parsed.smmBannerIcon || '';
+      if (parsed.promo) currentAdminPromo = parsed.promo;
     } catch(e) { annItems = []; }
     renderAdItems();
     renderMainCardEditor();
@@ -3417,13 +3511,14 @@
 
   // Pindah tab antara Pengumuman & Produk di panel admin
   function adSwitchTab(tab){
-    const isAnn = tab === 'ann';
-    document.getElementById('adTabAnn').style.display = isAnn ? 'block' : 'none';
-    document.getElementById('adTabProd').style.display = isAnn ? 'none' : 'block';
-    document.getElementById('adTabBtnAnn').style.background = isAnn ? 'linear-gradient(135deg,#7c5cfc,#fc5ca0)' : 'var(--card)';
-    document.getElementById('adTabBtnAnn').style.color = isAnn ? '#fff' : 'var(--muted)';
-    document.getElementById('adTabBtnProd').style.background = isAnn ? 'var(--card)' : 'linear-gradient(135deg,#7c5cfc,#fc5ca0)';
-    document.getElementById('adTabBtnProd').style.color = isAnn ? 'var(--muted)' : '#fff';
+    ['Ann','Prod','Promo'].forEach(t => {
+      const isActive = tab === t.toLowerCase();
+      document.getElementById('adTab'+t).style.display = isActive ? 'block' : 'none';
+      document.getElementById('adTabBtn'+t).style.background = isActive ? 'linear-gradient(135deg,#7c5cfc,#fc5ca0)' : 'var(--card)';
+      document.getElementById('adTabBtn'+t).style.color = isActive ? '#fff' : 'var(--muted)';
+      document.getElementById('adTabBtn'+t).style.border = isActive ? 'none' : '1px solid var(--border)';
+    });
+    if (tab === 'promo') renderAdPromoTab();
   }
 
   // Render editor kartu utama (Alight Motion) di panel admin
@@ -3733,7 +3828,7 @@
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_MASTER_KEY,
         },
-        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon })
+        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon, promo: currentAdminPromo })
       });
       saveBtn.textContent = '✅ Tersimpan!';
       setTimeout(()=>{ saveBtn.textContent = 'Simpan Perubahan'; saveBtn.disabled = false; }, 2000);
