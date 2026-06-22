@@ -535,7 +535,45 @@
     background:var(--card); border:1px solid var(--border); border-radius:16px;
     overflow:hidden; transition:border-color .3s, box-shadow .3s, transform .3s;
     aspect-ratio:1/1; display:flex; flex-direction:column;
-    cursor:pointer;
+    cursor:pointer; position:relative;
+  }
+  .badge-terlaris {
+    position:absolute; top:10px; left:10px; z-index:10;
+    background:linear-gradient(90deg,#ff8a00,#ff3d6e,#ff8a00);
+    background-size:200% auto;
+    color:#fff; font-size:0.62rem; font-weight:800;
+    padding:4px 10px 4px 8px; border-radius:20px;
+    letter-spacing:0.04em; text-transform:uppercase;
+    box-shadow:0 3px 10px rgba(255,61,110,0.5), 0 0 0 1px rgba(255,255,255,0.15) inset;
+    display:flex; align-items:center; gap:4px;
+    overflow:hidden;
+    animation:badgeShine 3s linear infinite, badgePulse 2.2s ease-in-out infinite;
+  }
+  .badge-terlaris::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+    transform:translateX(-100%);
+    animation:badgeSweep 2.6s ease-in-out infinite;
+  }
+  .badge-terlaris .flame {
+    display:inline-block; animation:flameWiggle 1.4s ease-in-out infinite;
+  }
+  @keyframes badgeShine {
+    0%   { background-position:0% 50%; }
+    100% { background-position:200% 50%; }
+  }
+  @keyframes badgePulse {
+    0%, 100% { box-shadow:0 3px 10px rgba(255,61,110,0.5), 0 0 0 1px rgba(255,255,255,0.15) inset; }
+    50%      { box-shadow:0 3px 16px rgba(255,61,110,0.85), 0 0 0 1px rgba(255,255,255,0.25) inset; }
+  }
+  @keyframes badgeSweep {
+    0%   { transform:translateX(-120%); }
+    55%  { transform:translateX(160%); }
+    100% { transform:translateX(160%); }
+  }
+  @keyframes flameWiggle {
+    0%, 100% { transform:rotate(-6deg) scale(1); }
+    50%      { transform:rotate(6deg) scale(1.12); }
   }
   .product-card:hover { border-color:var(--accent); box-shadow:0 0 20px var(--glow); transform:translateY(-2px); }
   .product-card.hidden-card { display:none; }
@@ -759,7 +797,7 @@
   .next-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(124,92,252,0.35); }
 
   .qris-wrap { padding:0 24px 24px; text-align:center; }
-  .qris-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin:16px 0; }
+  .qris-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin:16px 0; display:flex; flex-direction:column; align-items:center; }
   .qris-img { width:100%; max-width:240px; border-radius:10px; }
   .qris-placeholder {
     width:220px; height:220px; background:linear-gradient(135deg,#1a1030,#0f0f1a);
@@ -778,8 +816,11 @@
 
   /* ════ PAYMENT METHOD TABS ════ */
   .pay-method-tabs {
-    display:grid; grid-template-columns:1fr 1fr;
+    display:flex; justify-content:center;
     gap:8px; margin-bottom:18px;
+  }
+  .pay-method-tab {
+    min-width:160px;
   }
   .pay-method-tab {
     display:flex; flex-direction:column; align-items:center; gap:4px;
@@ -1721,6 +1762,7 @@
 
     <div class="product-row" id="productsRow">
       <div class="product-card" id="mainProductCard" data-category="apk" data-name="alight motion premium">
+        <div class="badge-terlaris"><span class="flame">🔥</span> Paling Banyak Dibeli</div>
         <div class="product-header" style="cursor:pointer;" onclick="openProductDetailAM()">
           <div class="app-icon"><img src="data:image/png;base64,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" style="width:54px;height:54px;border-radius:14px;object-fit:contain;"></div>
           <h2 id="amCardTitle">Alight Motion Premium</h2>
@@ -2098,29 +2140,38 @@
     <div class="ap-section-label">Pilih Tipe Akun</div>
     <div class="ap-types">
 
+      <!-- ✏️ OPSI 1: Email dari Seller -->
       <div class="ap-type sel" id="accpick-seller" onclick="pickAccType('seller')">
         <div class="ap-type-row">
           <div class="ap-type-left">
             <div class="ap-type-dot"></div>
             <span class="ap-type-name">📩 Email dari Seller</span>
+            <!-- Badge di bawah ini bisa diganti, misal: "Hemat", "Populer", "Tersedia" -->
             <span class="ap-type-tag">Hemat</span>
           </div>
+          <!-- Harga opsi 1 — harus sama dengan nilai 'seller' di accTypePrice (baris JS di bawah) -->
           <div class="ap-type-price">Rp2.000</div>
         </div>
         <div class="ap-type-perks">
+          <!-- Isi perk bisa diedit bebas, maksimal 3 baris -->
           <div class="ap-type-perk">Akun pakai email toko kami, tidak perlu daftar</div>
           <div class="ap-type-perk">Aktivasi lebih cepat &amp; mudah</div>
           <div class="ap-type-perk">Harga paling hemat, cocok untuk pengguna baru</div>
         </div>
       </div>
 
+      <!-- ✏️ OPSI 2: Email dari Buyer -->
+      <!-- Ganti class "disabled" → hapus "disabled" untuk mengaktifkan opsi ini -->
+      <!-- Atau tambahkan class "disabled" untuk menonaktifkan (tidak bisa diklik) -->
       <div class="ap-type disabled" id="accpick-buyer">
         <div class="ap-type-row">
           <div class="ap-type-left">
             <div class="ap-type-dot"></div>
             <span class="ap-type-name">🔑 Email dari Buyer</span>
+            <!-- Badge pink = status khusus (misal "Tutup Sementara", "Segera Hadir", "Terbatas") -->
             <span class="ap-type-tag pink">Tutup Sementara</span>
           </div>
+          <!-- Harga opsi 2 — harus sama dengan nilai 'buyer' di accTypePrice (baris JS di bawah) -->
           <div class="ap-type-price">Rp4.000</div>
         </div>
         <div class="ap-type-perks">
@@ -2221,7 +2272,7 @@
           <span style="font-size:0.75rem;background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);padding:2px 8px;border-radius:20px;font-weight:700;" id="promoDiscountAmt"></span>
         </div>
         <div class="amount-badge" id="amountBadge">Rp2.000</div>
-        <div class="nominal-unique" id="nominalUniqueNote" style="display:none;">Bayar sesuai nominal di atas (termasuk kode unik), jangan dibulatkan</div>
+        <div class="nominal-unique" id="nominalUniqueNote" style="display:none;"></div>
 
         <!-- Tab pilih metode -->
         <div class="pay-method-tabs" style="margin-top:14px;">
@@ -2235,7 +2286,7 @@
         <!-- Panel QRIS -->
         <div class="pay-panel active" id="panelQris">
           <div class="qris-box">
-            <div id="qrisCodeContainer" style="display:flex;align-items:center;justify-content:center;min-height:220px;background:#fff;border-radius:10px;padding:14px;">
+            <div id="qrisCodeContainer" style="display:flex;align-items:center;justify-content:center;min-height:220px;background:#fff;border-radius:10px;padding:14px;text-align:center;margin:0 auto;width:fit-content;">
               <span style="color:#9a9ab0;font-size:0.8rem;">Memuat QRIS...</span>
             </div>
           </div>
@@ -2377,10 +2428,53 @@
     type: 'am'
   };
 
-  // ---- Pilihan tipe akun: Email dari Seller (Rp2.000) vs Email dari Buyer (Rp4.000) ----
+  // ════════════════════════════════════════
+  //  ✏️ EDIT PILIHAN TIPE AKUN AM DI SINI
+  // ════════════════════════════════════════
+  //  accTypePrice → harga (angka, tanpa Rp/titik) untuk masing-masing opsi
+  //    seller = Email dari Seller  |  buyer = Email dari Buyer
+  //  accTypeName  → nama yang muncul di label pesanan & pesan WA
+  //
+  //  Jangan lupa sesuaikan juga teks harga di HTML (cari "ap-type-price")
+  //  dan class "disabled" pada div accpick-buyer (hapus "disabled" untuk aktifkan)
+  // ════════════════════════════════════════
   let selectedAccType = 'seller';
-  const accTypePrice = { seller: 2000, buyer: 4000 };
-  const accTypeName  = { seller: 'Email dari Seller', buyer: 'Email dari Buyer' };
+  let accTypePrice = { seller: 2000, buyer: 4000 }; // ← nilai default; akan otomatis diganti oleh harga dari Panel Admin (?manage) saat data berhasil dimuat
+  const accTypeName  = { seller: 'Email dari Seller', buyer: 'Email dari Buyer' }; // ← ganti nama di sini
+
+  // Ambil harga "Email dari Seller" & "Email dari Buyer" yang disimpan lewat Panel Admin (?manage),
+  // lalu perbarui semua tempat di halaman yang menampilkan harga tersebut.
+  function syncAccTypePricesFromMain(main){
+    if (!main) return;
+    const sellerPrice = Number(main.accSellerPrice);
+    const buyerPrice = Number(main.accBuyerPrice);
+    if (!isNaN(sellerPrice) && sellerPrice >= 0) accTypePrice.seller = sellerPrice;
+    if (!isNaN(buyerPrice) && buyerPrice >= 0) accTypePrice.buyer = buyerPrice;
+
+    // Update teks harga di kartu toggle (Home & Produk)
+    ['Home','Produk'].forEach(s=>{
+      const wrap = document.getElementById('accTypeToggle'+s);
+      if (!wrap) return;
+      wrap.querySelectorAll('.acc-type-opt').forEach(opt=>{
+        const tipe = opt.getAttribute('data-type');
+        const priceEl = opt.querySelector('.opt-price');
+        if (priceEl && accTypePrice[tipe] !== undefined) {
+          priceEl.textContent = 'Rp' + accTypePrice[tipe].toLocaleString('id-ID');
+        }
+      });
+    });
+
+    // Update teks harga di popup "Pilih Paket" (accpick)
+    const sellerPriceEl = document.querySelector('#accpick-seller .ap-type-price');
+    if (sellerPriceEl) sellerPriceEl.textContent = 'Rp' + accTypePrice.seller.toLocaleString('id-ID');
+    const buyerPriceEl = document.querySelector('#accpick-buyer .ap-type-price');
+    if (buyerPriceEl) buyerPriceEl.textContent = 'Rp' + accTypePrice.buyer.toLocaleString('id-ID');
+
+    // Update harga yang sedang tampil (toggle terpilih, bottom bar, dsb)
+    selectAccType(selectedAccType, 'Home');
+    const apBottom = document.getElementById('apBottomPrice');
+    if (apBottom) apBottom.textContent = 'Rp' + accTypePrice[accpickSelected || selectedAccType].toLocaleString('id-ID');
+  }
 
   function selectAccType(tipe, scope){
     selectedAccType = tipe;
@@ -2658,7 +2752,7 @@
     } else {
       currentOrder.buyerEmail = '';
     }
-    uniqueNominal = getFinalPrice() + Math.floor(Math.random()*89 + 1); // kode unik utk verifikasi manual
+    uniqueNominal = getFinalPrice();
     document.getElementById('amountBadge').textContent = 'Rp' + uniqueNominal.toLocaleString('id-ID');
     // Tampilkan info diskon promo di step 2
     const discRow = document.getElementById('promoDiscountRow');
@@ -3149,7 +3243,7 @@
   // ════════════════════════════════════════════════
   const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_ID;
   let annItems = []; // cache di memori untuk panel admin
-  let prodMain = { judul:'Alight Motion Premium', sub:'Lisensi resmi · Aktif 1 Tahun', fitur:'Tanpa watermark di semua hasil export\nSemua font & stiker premium terbuka\nExport kualitas hingga 4K\nSupport import preset hingga 5MB & format XML\nGaransi penuh 6 bulan', harga:'Mulai Rp2.000', periode:'/ tahun', stok:'' }; // cache kartu utama
+  let prodMain = { judul:'Alight Motion Premium', sub:'Lisensi resmi · Aktif 1 Tahun', fitur:'Tanpa watermark di semua hasil export\nSemua font & stiker premium terbuka\nExport kualitas hingga 4K\nSupport import preset hingga 5MB & format XML\nGaransi penuh 6 bulan', harga:'Mulai Rp2.000', periode:'/ tahun', stok:'', accSellerPrice:2000, accBuyerPrice:4000 }; // cache kartu utama
   let prodExtra = []; // cache kartu produk tambahan
   let publicExtraProducts = []; // cache produk tambahan versi publik (untuk popup detail)
   let smmBannerIcon = ''; // cache link foto ikon banner Suntik Sosmed
@@ -3217,6 +3311,7 @@
   // Tampilkan isi kartu utama (Alight Motion) hasil edit admin ke halaman publik
   function renderPublicMainCard(main){
     prodMain = main; // simpan juga ke cache global biar popup detail bisa baca status stok terbaru
+    syncAccTypePricesFromMain(main);
     const elT = document.getElementById('amCardTitle');
     const elS = document.getElementById('amCardSub');
     const elF = document.getElementById('amCardFeatures');
@@ -3554,6 +3649,22 @@
             style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
         </div>
       </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="font-size:0.8rem;font-weight:700;color:#a78bfa;margin-bottom:10px;">💰 Harga Pilihan Tipe Akun</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">📩 Email dari Seller (Rp)</label>
+            <input type="number" min="0" value="${escAttr(prodMain.accSellerPrice!==undefined&&prodMain.accSellerPrice!==null?prodMain.accSellerPrice:2000)}" oninput="adUpdateMain('accSellerPrice',this.value)"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">🔑 Email dari Buyer (Rp)</label>
+            <input type="number" min="0" value="${escAttr(prodMain.accBuyerPrice!==undefined&&prodMain.accBuyerPrice!==null?prodMain.accBuyerPrice:4000)}" oninput="adUpdateMain('accBuyerPrice',this.value)"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:6px;line-height:1.5;">Ini harga yang muncul di popup "Pilih Paket" saat pembeli klik Beli Sekarang. Isi angka saja tanpa "Rp" atau titik.</div>
+      </div>
       <div style="margin-top:10px;">
         <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Stok (kosongkan = tidak dibatasi, isi 0 = tampil "Stok Habis")</label>
         <input type="number" min="0" value="${prodMain.stok===undefined||prodMain.stok===null?'':escAttr(prodMain.stok)}" oninput="adUpdateMain('stok',this.value)" placeholder="Contoh: 10"
@@ -3563,7 +3674,11 @@
   }
 
   function adUpdateMain(field, value){
-    prodMain[field] = value;
+    if (field === 'accSellerPrice' || field === 'accBuyerPrice') {
+      prodMain[field] = value === '' ? 0 : Number(value);
+    } else {
+      prodMain[field] = value;
+    }
   }
 
   // Render daftar kartu editor produk tambahan
