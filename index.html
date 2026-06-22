@@ -2499,7 +2499,7 @@
       const checked = (p.produk || ['am']).includes(opt.id);
       const label = document.createElement('label');
       label.style = 'display:flex;align-items:center;gap:8px;font-size:0.84rem;color:var(--text);cursor:pointer;padding:8px 10px;background:var(--surface);border-radius:8px;border:1px solid var(--border);';
-      label.innerHTML = '<input type="checkbox" ' + (checked?'checked':'') + ' onchange="adTogglePromoProduk('' + opt.id + '',this.checked)" style="accent-color:#7c5cfc;width:15px;height:15px;"> ' + escHtml(opt.nama);
+      label.innerHTML = '<input type="checkbox" ' + (checked?'checked':'') + ' onchange="adTogglePromoProduk(\'' + opt.id + '\',this.checked)" style="accent-color:#7c5cfc;width:15px;height:15px;"> ' + escHtml(opt.nama);
       wrap.appendChild(label);
     });
     adUpdatePromoPreview();
@@ -2715,7 +2715,8 @@
 
   // ── PAYMENT TAB SWITCHER ──
   function switchPayTab(tab){
-    document.getElementById('tabQris').classList.toggle('active', tab==='qris');    document.getElementById('panelQris').classList.toggle('active', tab==='qris');    document.body.removeChild(ta);
+    document.getElementById('tabQris').classList.toggle('active', tab==='qris');
+    document.getElementById('panelQris').classList.toggle('active', tab==='qris');
   }
 
   function toggleQrisZoom(){
