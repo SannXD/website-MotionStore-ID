@@ -470,6 +470,27 @@
   .product-wrap { max-width:320px; margin:0 auto; padding:0 24px 60px; animation:fadeSlideUp 0.7s 0.5s ease both; }
 
   /* ── Search & Filter ── */
+  .smm-banner {
+    display:flex; align-items:center; gap:12px;
+    margin:0 16px 16px; padding:14px 16px; border-radius:16px;
+    background:linear-gradient(90deg,#7c5cfc,#fc5ca0);
+    text-decoration:none; cursor:pointer; border:none;
+    animation:fadeSlideUp 0.6s 0.3s ease both;
+    transition:transform .2s, opacity .2s;
+  }
+  .smm-banner:hover { transform:translateY(-2px); opacity:0.95; }
+  .smm-banner-icon {
+    flex-shrink:0; width:42px; height:42px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; overflow:hidden;
+    background:rgba(255,255,255,0.18);
+  }
+  .smm-banner-icon img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+  .smm-banner-text { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+  .smm-banner-text strong { color:#fff; font-family:'Sora',sans-serif; font-size:0.95rem; font-weight:800; }
+  .smm-banner-text span { color:rgba(255,255,255,0.92); font-size:0.76rem; line-height:1.3; }
+  .smm-banner-arrow { color:#fff; font-size:1.5rem; font-weight:700; flex-shrink:0; }
+
   .shop-controls { padding:0 16px; margin-bottom:4px; animation:fadeSlideUp 0.6s 0.4s ease both; }
   .search-bar {
     display:flex; align-items:center; gap:10px;
@@ -1652,6 +1673,16 @@
       </div>
     </section>
 
+    <!-- Banner Suntik Sosmed — selalu terlihat tanpa perlu buka menu -->
+    <a class="smm-banner" href="javascript:void(0)" onclick="showPage('sosmed')">
+      <span class="smm-banner-icon" id="smmBannerIcon">📈</span>
+      <span class="smm-banner-text">
+        <strong>Suntik Sosmed</strong>
+        <span>Followers, Likes, Views Instagram &amp; TikTok — proses cepat!</span>
+      </span>
+      <span class="smm-banner-arrow">›</span>
+    </a>
+
     <!-- Search & Filter -->
     <div class="shop-controls">
       <div class="search-bar">
@@ -1952,6 +1983,16 @@
       <div id="adTabProd" style="display:none;">
         <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Kartu utama (Alight Motion Premium)</div>
         <div id="adMainCard" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;"><!-- editor kartu utama, di-generate via JS --></div>
+
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Foto banner Suntik Sosmed</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div id="adSmmBannerPrev" style="width:42px;height:42px;border-radius:12px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;overflow:hidden;flex-shrink:0;">📈</div>
+            <input type="text" id="adSmmBannerIconInput" placeholder="https://contoh.com/gambar.jpg" oninput="adUpdateSmmBannerIcon(this.value)"
+              style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-top:6px;">Tempel link gambar (URL) untuk ikon banner "Suntik Sosmed" di Beranda. Kosongkan untuk pakai ikon default 📈</div>
+        </div>
 
         <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Kartu produk tambahan</div>
         <div id="adExtraList"><!-- daftar kartu produk tambahan, di-generate via JS --></div>
@@ -2732,16 +2773,18 @@
   let prodMain = { judul:'Alight Motion Premium', sub:'Lisensi resmi · Aktif 1 Tahun', fitur:'Tanpa watermark di semua hasil export\nSemua font & stiker premium terbuka\nExport kualitas hingga 4K\nSupport import preset hingga 5MB & format XML\nGaransi penuh 6 bulan', harga:'Mulai Rp2.000', periode:'/ tahun', stok:'' }; // cache kartu utama
   let prodExtra = []; // cache kartu produk tambahan
   let publicExtraProducts = []; // cache produk tambahan versi publik (untuk popup detail)
+  let smmBannerIcon = ''; // cache link foto ikon banner Suntik Sosmed
 
   // Pisahkan record JSONBin (objek baru {announcements, main, extra} ATAU array lama) jadi 3 bagian
   function parseBinRecord(record){
     if (Array.isArray(record)) {
-      return { announcements: record, main: null, extra: [] };
+      return { announcements: record, main: null, extra: [], smmBannerIcon: '' };
     }
     return {
       announcements: (record && record.announcements) || [],
       main: (record && record.main) || null,
-      extra: (record && record.extra) || []
+      extra: (record && record.extra) || [],
+      smmBannerIcon: (record && record.smmBannerIcon) || ''
     };
   }
 
@@ -2751,6 +2794,22 @@
       return d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'}) + ' ' +
              d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     } catch(e) { return ''; }
+  }
+
+  // Render ikon: kalau berupa URL gambar, tampilkan <img>; kalau bukan, tampilkan sebagai emoji/teks
+  function renderProdIcon(icon, sizePx){
+    const val = (icon || '').trim();
+    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
+    if (isUrl) {
+      return '<img src="' + escAttr(val) + '" style="width:' + sizePx + 'px;height:' + sizePx + 'px;object-fit:cover;" onerror="this.parentElement.textContent=\'📈\'">';
+    }
+    return escHtml(val || '📈');
+  }
+
+  function applySmmBannerIcon(icon){
+    smmBannerIcon = icon || '';
+    const el = document.getElementById('smmBannerIcon');
+    if (el) el.innerHTML = renderProdIcon(smmBannerIcon, 42);
   }
 
   // Fetch data dari JSONBin dan tampilkan feed kalau ada item
@@ -2764,6 +2823,7 @@
       const parsed = parseBinRecord(json.record);
       if (parsed.main) renderPublicMainCard(parsed.main);
       renderPublicExtraProducts(parsed.extra);
+      applySmmBannerIcon(parsed.smmBannerIcon);
       if (parsed.announcements.length) tampilAnnFeed(parsed.announcements);
     } catch(e) { /* Gagal fetch → tampilan default tetap dipakai */ }
   }
@@ -2813,16 +2873,6 @@
   }
 
   // Render kartu-kartu produk tambahan ke halaman publik (muncul di kanan kartu utama)
-  // Render ikon produk: kalau berupa URL gambar, tampilkan <img>; kalau bukan, tampilkan sebagai emoji/teks
-  function renderProdIcon(icon, sizePx){
-    const val = (icon || '').trim();
-    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
-    if (isUrl) {
-      return '<img src="' + escAttr(val) + '" style="width:' + sizePx + 'px;height:' + sizePx + 'px;border-radius:14px;object-fit:cover;" onerror="this.outerHTML=\'📦\'">';
-    }
-    return escHtml(val || '🛍️');
-  }
-
   function renderPublicExtraProducts(extra){
     const row = document.getElementById('productsRow');
     if (!row) return;
@@ -2843,7 +2893,7 @@
         : `<button class="buy-btn" onclick="openProductDetailExtra(${idx})">${escHtml(p.teksTombol || 'Beli Sekarang')}</button>`;
       card.innerHTML = `
         <div class="product-header" style="cursor:pointer;${isHabis ? 'opacity:0.6;' : ''}" onclick="openProductDetailExtra(${idx})">
-          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;overflow:hidden;">${renderProdIcon(p.icon, 54)}</div>
+          <div class="app-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.9rem;">${escHtml(p.icon || '🛍️')}</div>
           <h2>${escHtml(p.nama || 'Nama Produk')}</h2>
           <div class="sub">${escHtml(p.sub || '')}</div>
         </div>
@@ -2939,7 +2989,7 @@
     const labelProduk = p.nama || 'Produk';
     const { isHabis } = getStokInfo(p);
     openProductDetail({
-      iconHtml: renderProdIcon(p.icon, 64),
+      iconHtml: escHtml(p.icon || '🛍️'),
       title: p.nama || 'Nama Produk',
       sub: p.sub || '',
       desc: p.deskripsi || '',
@@ -3030,6 +3080,7 @@
       renderAdItems();
       renderMainCardEditor();
       renderExtraProductsAdmin();
+      renderAdSmmBannerField();
       return;
     }
     try {
@@ -3041,10 +3092,35 @@
       annItems = parsed.announcements;
       prodMain = parsed.main || prodMain;
       prodExtra = parsed.extra;
+      smmBannerIcon = parsed.smmBannerIcon || '';
     } catch(e) { annItems = []; }
     renderAdItems();
     renderMainCardEditor();
     renderExtraProductsAdmin();
+    renderAdSmmBannerField();
+  }
+
+  function renderAdSmmBannerField(){
+    const input = document.getElementById('adSmmBannerIconInput');
+    if (input) input.value = smmBannerIcon || '';
+    adRefreshSmmBannerPreview();
+  }
+
+  function adUpdateSmmBannerIcon(value){
+    smmBannerIcon = value;
+    adRefreshSmmBannerPreview();
+  }
+
+  function adRefreshSmmBannerPreview(){
+    const prev = document.getElementById('adSmmBannerPrev');
+    if (!prev) return;
+    const val = (smmBannerIcon || '').trim();
+    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
+    if (isUrl) {
+      prev.innerHTML = '<img src="' + escAttr(val) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.textContent=\'📈\'">';
+    } else {
+      prev.textContent = '📈';
+    }
   }
 
   // Pindah tab antara Pengumuman & Produk di panel admin
@@ -3113,23 +3189,17 @@
     }
     prodExtra.forEach((p, idx) => {
       const card = document.createElement('div');
-      card.id = 'adProdCard' + idx;
       card.style = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;';
-      const katLabel = {apk:'📱 Apk Premium', tutorial:'📚 Tutorial', smm:'📈 SMM Panel', lainnya:'✨ Lainnya'}[p.kategori || 'apk'] || '📱 Apk Premium';
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span style="font-size:0.78rem;color:var(--muted);">Kartu Produk #${idx+1} &middot; <span id="adKatBadge${idx}" style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem;">${katLabel}</span></span>
+          <span style="font-size:0.78rem;color:var(--muted);">Kartu Produk #${idx+1}</span>
           <button type="button" onclick="adRemoveProduct(${idx})" style="background:none;border:none;color:#fc5ca0;font-size:0.78rem;cursor:pointer;font-family:inherit;">🗑️ Hapus</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:10px;">
           <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Foto Produk (link gambar)</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <img id="adIconPrev${idx}" src="${escAttr(p.icon||'')}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--surface);border:1px solid var(--border);${/^(https?:)?\/\//.test((p.icon||'').trim())||/^data:image\//.test((p.icon||'').trim())?'':'display:none;'}" onerror="this.style.display='none';">
-              <input type="text" value="${escAttr(p.icon||'')}" oninput="adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});" placeholder="https://contoh.com/gambar.jpg"
-                style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
-            </div>
-            <div style="font-size:0.68rem;color:var(--muted);margin-top:3px;">Tempel link gambar (URL). Kosongkan untuk pakai ikon default 🛍️</div>
+            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Ikon (emoji)</label>
+            <input type="text" value="${escAttr(p.icon||'🛍️')}" oninput="adUpdateProduct(${idx},'icon',this.value)"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
           </div>
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Nama Produk</label>
@@ -3145,7 +3215,7 @@
           </div>
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Kategori</label>
-            <select id="adKategori${idx}" onchange="adUpdateProduct(${idx},'kategori',this.value); adRefreshKategoriBadge(${idx});"
+            <select onchange="adUpdateProduct(${idx},'kategori',this.value)"
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
               <option value="apk" ${(p.kategori||'apk')==='apk'?'selected':''}>📱 Apk Premium</option>
               <option value="tutorial" ${p.kategori==='tutorial'?'selected':''}>📚 Tutorial</option>
@@ -3199,26 +3269,6 @@
     prodExtra[idx][field] = value;
   }
 
-  function adRefreshKategoriBadge(idx){
-    const badge = document.getElementById('adKatBadge' + idx);
-    if (!badge || !prodExtra[idx]) return;
-    const katLabel = {apk:'📱 Apk Premium', tutorial:'📚 Tutorial', smm:'📈 SMM Panel', lainnya:'✨ Lainnya'}[prodExtra[idx].kategori || 'apk'] || '📱 Apk Premium';
-    badge.textContent = katLabel;
-  }
-
-  function adRefreshIconPreview(idx){
-    const img = document.getElementById('adIconPrev' + idx);
-    if (!img || !prodExtra[idx]) return;
-    const val = (prodExtra[idx].icon || '').trim();
-    const isUrl = /^(https?:)?\/\//.test(val) || /^data:image\//.test(val);
-    if (isUrl) {
-      img.src = val;
-      img.style.display = '';
-    } else {
-      img.style.display = 'none';
-    }
-  }
-
   function adRemoveProduct(idx){
     prodExtra.splice(idx, 1);
     renderExtraProductsAdmin();
@@ -3227,7 +3277,7 @@
   function adAddProduct(){
     prodExtra.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-      icon: '',
+      icon: '🛍️',
       nama: '',
       sub: '',
       kategori: 'apk',
@@ -3367,7 +3417,7 @@
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_MASTER_KEY,
         },
-        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra })
+        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon })
       });
       saveBtn.textContent = '✅ Tersimpan!';
       setTimeout(()=>{ saveBtn.textContent = 'Simpan Perubahan'; saveBtn.disabled = false; }, 2000);
