@@ -2479,7 +2479,9 @@
       return;
     }
 
-    const exp = new Date(found.berlakuHingga);
+    // Tambah +07:00 agar tanggal dibaca sebagai WIB bukan UTC
+    const expStr = found.berlakuHingga.includes('+') ? found.berlakuHingga : found.berlakuHingga + '+07:00';
+    const exp = new Date(expStr);
     if (now > exp) {
       msgEl.style.color = '#ef4444';
       msgEl.textContent = '❌ Kode promo sudah kedaluwarsa';
