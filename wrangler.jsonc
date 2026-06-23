@@ -1,5 +1,5 @@
 {
-  "name": "website-motionstoreid",
+  "name": "website.motionstore.workers.dev",
   "compatibility_date": "2025-01-01",
   "main": "worker.js",
   "assets": {
