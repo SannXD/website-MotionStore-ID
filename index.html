@@ -1803,7 +1803,7 @@
       <h2 style="font-family:'Sora',sans-serif;font-size:1.3rem;margin-bottom:18px;text-align:center;">Pilihan Paket</h2>
       <div class="product-card" style="margin-bottom:16px;">
         <div class="product-body">
-          <div class="price-row"><div class="price" style="font-size:1.6rem;">Mulai Rp2.000</div><div class="price-period">/ tahun</div></div>
+          <div class="price-row"><div class="price" id="priceProdukCard" style="font-size:1.6rem;">Mulai Rp2.000</div><div class="price-period" id="periodeProdukCard">/ tahun</div></div>
           <button class="buy-btn" onclick="openAccPick()">Pilih Paket</button>
         </div>
       </div>
@@ -3370,8 +3370,8 @@
   async function initAnn(){
     if (JSONBIN_ID === 'ISI_BIN_ID_KAMU_DI_SINI') return;
     try {
-      const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Access-Key': JSONBIN_KEY }
+      const res = await fetch(JSONBIN_URL + '/latest?t=' + Date.now(), {
+        headers: { 'X-Access-Key': JSONBIN_KEY, 'Cache-Control': 'no-cache' }
       });
       const json = await res.json();
       const parsed = parseBinRecord(json.record);
@@ -3398,6 +3398,11 @@
     if (elS && main.sub) elS.textContent = main.sub;
     if (elP && main.harga) elP.textContent = main.harga;
     if (elPP && main.periode) elPP.textContent = main.periode;
+    // Update juga kartu harga di halaman Produk
+    const elProdukCard = document.getElementById('priceProdukCard');
+    const elProdukPeriode = document.getElementById('periodeProdukCard');
+    if (elProdukCard && main.harga) elProdukCard.textContent = main.harga;
+    if (elProdukPeriode && main.periode) elProdukPeriode.textContent = main.periode;
     if (elF && main.fitur) {
       elF.innerHTML = '';
       main.fitur.split('\n').map(s=>s.trim()).filter(Boolean).forEach(line=>{
@@ -3765,8 +3770,8 @@
       return;
     }
     try {
-      const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+      const res = await fetch(JSONBIN_URL + '/latest?t=' + Date.now(), {
+        headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, 'Cache-Control': 'no-cache' }
       });
       const json = await res.json();
       const parsed = parseBinRecord(json.record);
@@ -4210,7 +4215,7 @@
     }
 
     try {
-      await fetch(JSONBIN_URL, {
+      const res = await fetch(JSONBIN_URL, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -4218,10 +4223,16 @@
         },
         body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon, promo: currentAdminPromo })
       });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      // ── Setelah simpan berhasil, langsung perbarui tampilan publik di halaman ──
+      renderPublicMainCard(prodMain);
+      renderPublicExtraProducts(prodExtra);
+      applySmmBannerIcon(smmBannerIcon);
+      applyPromoFromAdmin(currentAdminPromo);
       saveBtn.textContent = '✅ Tersimpan!';
       setTimeout(()=>{ saveBtn.textContent = 'Simpan Perubahan'; saveBtn.disabled = false; }, 2000);
     } catch(e) {
-      saveBtn.textContent = '❌ Gagal simpan';
+      saveBtn.textContent = '❌ Gagal simpan — ' + (e.message || 'coba lagi');
       saveBtn.disabled = false;
     }
   }
