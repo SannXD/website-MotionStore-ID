@@ -2152,8 +2152,7 @@
           <!-- Harga opsi 1 — harus sama dengan nilai 'seller' di accTypePrice (baris JS di bawah) -->
           <div class="ap-type-price">Rp2.000</div>
         </div>
-        <div class="ap-type-perks">
-          <!-- Isi perk bisa diedit bebas, maksimal 3 baris -->
+        <div class="ap-type-perks" id="accpick-seller-perks">
           <div class="ap-type-perk">Akun pakai email toko kami, tidak perlu daftar</div>
           <div class="ap-type-perk">Aktivasi lebih cepat &amp; mudah</div>
           <div class="ap-type-perk">Harga paling hemat, cocok untuk pengguna baru</div>
@@ -2174,7 +2173,7 @@
           <!-- Harga opsi 2 — harus sama dengan nilai 'buyer' di accTypePrice (baris JS di bawah) -->
           <div class="ap-type-price">Rp4.000</div>
         </div>
-        <div class="ap-type-perks">
+        <div class="ap-type-perks" id="accpick-buyer-perks">
           <div class="ap-type-perk">Akun didaftarkan pakai email kamu sendiri</div>
           <div class="ap-type-perk">Kamu pegang penuh kendali &amp; password</div>
           <div class="ap-type-perk">Belum tersedia saat ini, coba lagi nanti ya</div>
@@ -2239,6 +2238,7 @@
           </div>
           <div class="ap-type-price" id="extraOpsiAHarga">Rp0</div>
         </div>
+        <div class="ap-type-perks" id="extraOpsiAPerks" style="display:none;"></div>
       </div>
       <div class="ap-type" id="extraOpsiB" onclick="pickExtraOpsi('b')">
         <div class="ap-type-row">
@@ -2248,6 +2248,7 @@
           </div>
           <div class="ap-type-price" id="extraOpsiBHarga">Rp0</div>
         </div>
+        <div class="ap-type-perks" id="extraOpsiBPerks" style="display:none;"></div>
       </div>
     </div>
     <div class="ap-bottom">
@@ -3231,6 +3232,26 @@
 
   function openAccPick(){
     accpickSelected = selectedAccType;
+    // Inject nama opsi dari prodMain (kalau ada)
+    const selNamaEl = document.getElementById('accpick-seller-nama');
+    const buyNamaEl = document.getElementById('accpick-buyer-nama');
+    if (selNamaEl) selNamaEl.textContent = (prodMain.accSellerName || 'Email dari Seller');
+    if (buyNamaEl) buyNamaEl.textContent = (prodMain.accBuyerName || 'Email dari Buyer');
+    // Inject deskripsi bullet poin dari prodMain
+    const selPerksEl = document.getElementById('accpick-seller-perks');
+    const buyPerksEl = document.getElementById('accpick-buyer-perks');
+    function renderPerks(el, desc){
+      if (!el) return;
+      const lines = (desc||'').split('\n').map(s=>s.trim()).filter(Boolean);
+      if (lines.length){
+        el.innerHTML = lines.map(l=>'<div class="ap-type-perk">'+escHtml(l)+'</div>').join('');
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+    renderPerks(selPerksEl, prodMain.accSellerDesc);
+    renderPerks(buyPerksEl, prodMain.accBuyerDesc);
     _renderAccPick();
     const overlay = document.getElementById('accpickOverlay');
     overlay.style.display = 'flex';
@@ -3583,6 +3604,22 @@
     if (opsiAHarga) opsiAHarga.textContent = 'Rp' + Number(p.opsiAHarga).toLocaleString('id-ID');
     if (opsiBHarga) opsiBHarga.textContent = 'Rp' + Number(p.opsiBHarga).toLocaleString('id-ID');
 
+    // Inject deskripsi bullet poin opsi A & B
+    function renderExtraPerks(containerId, desc, hasOpsi){
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      if (!hasOpsi) { el.style.display='none'; return; }
+      const lines = (desc||'').split('\n').map(s=>s.trim()).filter(Boolean);
+      if (lines.length){
+        el.innerHTML = lines.map(l=>'<div class="ap-type-perk">'+escHtml(l)+'</div>').join('');
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+    renderExtraPerks('extraOpsiAPerks', p.opsiADesc, hasA);
+    renderExtraPerks('extraOpsiBPerks', p.opsiBDesc, hasB);
+
     // Default pilih opsi pertama yang tersedia
     extraOpsiPickSelected = hasA ? 'a' : 'b';
     _renderExtraOpsiPick();
@@ -3842,6 +3879,16 @@
           </div>
         </div>
         <div style="font-size:0.68rem;color:var(--muted);margin-top:6px;line-height:1.5;">Nama & harga muncul di popup "Pilih Paket" saat pembeli klik Beli Sekarang. Isi harga angka saja tanpa "Rp" atau titik.</div>
+        <div style="margin-top:10px;">
+          <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">📝 Deskripsi Opsi A (satu baris = satu poin ✓)</label>
+          <textarea rows="3" oninput="adUpdateMain('accSellerDesc',this.value)" placeholder="Akun pakai email toko kami, tidak perlu daftar"
+            style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;resize:vertical;box-sizing:border-box;">${escHtml(prodMain.accSellerDesc||'')}</textarea>
+        </div>
+        <div style="margin-top:8px;">
+          <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">📝 Deskripsi Opsi B (satu baris = satu poin ✓)</label>
+          <textarea rows="3" oninput="adUpdateMain('accBuyerDesc',this.value)" placeholder="Akun didaftarkan pakai email kamu sendiri"
+            style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;resize:vertical;box-sizing:border-box;">${escHtml(prodMain.accBuyerDesc||'')}</textarea>
+        </div>
       </div>
       <div style="margin-top:10px;">
         <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Stok (kosongkan = tidak dibatasi, isi 0 = tampil "Stok Habis")</label>
@@ -3954,6 +4001,16 @@
                 style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
             </div>
           </div>
+          <div style="margin-top:8px;">
+            <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">📝 Deskripsi Opsi A (satu baris = satu poin ✓)</label>
+            <textarea rows="2" oninput="adUpdateProduct(${idx},'opsiADesc',this.value)" placeholder="Deskripsi opsi A..."
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;resize:vertical;box-sizing:border-box;">${escHtml(p.opsiADesc||'')}</textarea>
+          </div>
+          <div style="margin-top:6px;">
+            <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">📝 Deskripsi Opsi B (satu baris = satu poin ✓)</label>
+            <textarea rows="2" oninput="adUpdateProduct(${idx},'opsiBDesc',this.value)" placeholder="Deskripsi opsi B..."
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;resize:vertical;box-sizing:border-box;">${escHtml(p.opsiBDesc||'')}</textarea>
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
@@ -4022,8 +4079,10 @@
       stok: '',
       opsiANama: '',
       opsiAHarga: '',
+      opsiADesc: '',
       opsiBNama: '',
-      opsiBHarga: ''
+      opsiBHarga: '',
+      opsiBDesc: ''
     });
     renderExtraProductsAdmin();
     const list = document.getElementById('adExtraList');
