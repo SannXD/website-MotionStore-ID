@@ -1794,6 +1794,9 @@
     <!-- Produk tambahan (jika ada) akan ditambahkan otomatis di sebelah kanan kartu utama -->
   </div>
 
+  <!-- PAGINATION -->
+  <div id="paginationBar" style="display:none;justify-content:center;align-items:center;gap:6px;padding:18px 0 8px;flex-wrap:wrap;"></div>
+
   <!-- PAGE: PRODUK -->
   <div class="page" id="page-produk">
     <div class="product-wrap" style="padding-top:40px;">
@@ -3929,7 +3932,7 @@
           <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Foto Produk (link gambar)</label>
           <div style="display:flex;align-items:center;gap:8px;">
             <img id="adIconPrev${idx}" src="${escAttr(p.icon||'')}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--surface);border:1px solid var(--border);${/^(https?:)?\/\//.test((p.icon||'').trim())||/^data:image\//.test((p.icon||'').trim())?'':'display:none;'}" onerror="this.style.display='none';">
-            <input type="text" value="${escAttr(p.icon||'')}" oninput="adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});" placeholder="https://contoh.com/gambar.jpg"
+            <input type="text" value="${escAttr(p.icon||'')}" oninput="adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});" onchange="adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});" onpaste="setTimeout(()=>{adUpdateProduct(${idx},'icon',this.value); adRefreshIconPreview(${idx});},0);" placeholder="https://contoh.com/gambar.jpg"
               style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
           </div>
           <div style="font-size:0.68rem;color:var(--muted);margin-top:3px;">Tempel link gambar (URL, misal dari Catbox). Kosongkan untuk pakai ikon default 🛍️</div>
@@ -4067,7 +4070,7 @@
   function adAddProduct(){
     prodExtra.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-      icon: '🛍️',
+      icon: '',
       nama: '',
       sub: '',
       kategori: 'apk',
@@ -4455,28 +4458,79 @@
 
   // ---- Pencarian & filter kategori produk di halaman Beranda ----
   let activeCategory = 'semua';
+  let currentPage = 1;
+  const PRODUCTS_PER_PAGE = 6;
 
   function setCategory(btn, cat){
     activeCategory = cat;
+    currentPage = 1;
     document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     applyProductFilters();
   }
 
   function filterProducts(){
+    currentPage = 1;
     applyProductFilters();
+  }
+
+  function goToPage(page){
+    currentPage = page;
+    applyProductFilters();
+    const row = document.getElementById('productsRow');
+    if (row) row.scrollIntoView({behavior:'smooth', block:'start'});
   }
 
   function applyProductFilters(){
     const q = (document.getElementById('productSearch').value || '').trim().toLowerCase();
-    const cards = document.querySelectorAll('#productsRow .product-card');
-    cards.forEach(card => {
+    const allCards = Array.from(document.querySelectorAll('#productsRow .product-card'));
+
+    // Filter dulu
+    const matched = allCards.filter(card => {
       const cat = card.dataset.category || 'apk';
       const name = (card.dataset.name || card.querySelector('h2')?.textContent || '').toLowerCase();
       const matchCat = activeCategory === 'semua' || cat === activeCategory;
       const matchSearch = !q || name.includes(q);
-      card.classList.toggle('hidden-card', !(matchCat && matchSearch));
+      return matchCat && matchSearch;
     });
+
+    // Hitung total halaman (kartu utama AM tidak dihitung dalam pagination)
+    const extraMatched = matched.filter(c => c.classList.contains('extra-product-card'));
+    const mainCard = matched.find(c => !c.classList.contains('extra-product-card'));
+    const totalPages = Math.ceil(extraMatched.length / PRODUCTS_PER_PAGE);
+    if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const endIdx = startIdx + PRODUCTS_PER_PAGE;
+
+    // Tampilkan/sembunyikan kartu
+    allCards.forEach(card => {
+      if (!card.classList.contains('extra-product-card')) {
+        // Kartu utama AM: tampilkan hanya di halaman 1 atau kalau memang masuk filter
+        card.classList.toggle('hidden-card', !matched.includes(card) || currentPage > 1);
+      } else {
+        const idxInFiltered = extraMatched.indexOf(card);
+        const inPage = idxInFiltered >= startIdx && idxInFiltered < endIdx;
+        card.classList.toggle('hidden-card', !inPage);
+      }
+    });
+
+    // Render pagination bar
+    const bar = document.getElementById('paginationBar');
+    if (!bar) return;
+    if (totalPages <= 1) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+
+    const btnStyle = (active) => `cursor:pointer;padding:7px 13px;border-radius:8px;border:1.5px solid ${active ? 'var(--accent)' : 'var(--border)'};background:${active ? 'var(--accent)' : 'var(--surface)'};color:${active ? '#fff' : 'var(--text)'};font-size:0.85rem;font-weight:${active ? '700' : '400'};transition:all .18s;`;
+
+    let html = '';
+    html += '<button style="' + btnStyle(false) + 'opacity:' + (currentPage===1?'0.35':'1') + ';cursor:' + (currentPage===1?'default':'pointer') + ';" onclick="if(' + currentPage + '>1) goToPage(' + (currentPage-1) + ')">&#8249;</button>';
+    for (let i = 1; i <= totalPages; i++) {
+      html += '<button style="' + btnStyle(i===currentPage) + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+    }
+    html += '<button style="' + btnStyle(false) + 'opacity:' + (currentPage===totalPages?'0.35':'1') + ';cursor:' + (currentPage===totalPages?'default':'pointer') + ';" onclick="if(' + currentPage + '<' + totalPages + ') goToPage(' + (currentPage+1) + ')">&#8250;</button>';
+    bar.innerHTML = html;
   }
 
   // ---- Page switching ----
