@@ -1973,15 +1973,21 @@
 
   <!-- ADMIN PANEL (buka via ?manage di URL) -->
   <div id="adminPanelOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:center;justify-content:center;padding:20px;">
-    <div id="adminLoginBox" style="background:var(--surface);border-radius:18px;padding:32px;max-width:360px;width:100%;text-align:center;">
+    <div id="adminLoginBox" style="background:var(--surface);border-radius:18px;padding:32px;max-width:380px;width:100%;text-align:center;">
       <div style="font-size:2rem;margin-bottom:12px;">🔐</div>
       <div style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:6px;color:var(--text);">Panel Admin</div>
-      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Masukkan password untuk masuk</div>
-      <input id="adminPassInput" type="password" placeholder="Password admin" onkeydown="if(event.key==='Enter')adminLogin()"
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:4px;">Masukkan password admin</div>
+      <div style="font-size:0.74rem;color:#7c5cfc;margin-bottom:20px;line-height:1.5;">
+        🔒 Password diverifikasi oleh server — tidak tersimpan di kode
+      </div>
+      <input id="adminMasterKeyInput" type="password" placeholder="Password admin" onkeydown="if(event.key==='Enter')adminLogin()"
         style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:10px;font-size:0.9rem;font-family:inherit;margin-bottom:10px;box-sizing:border-box;">
       <div id="adminLoginErr" style="color:#fc5ca0;font-size:0.8rem;min-height:18px;margin-bottom:8px;"></div>
       <button onclick="adminLogin()" style="width:100%;background:linear-gradient(135deg,#7c5cfc,#fc5ca0);color:#fff;border:none;padding:12px;border-radius:12px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;">Masuk</button>
       <button onclick="closeAdminPanel()" style="margin-top:10px;width:100%;background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer;font-family:inherit;padding:6px;">Batal</button>
+      <div style="margin-top:16px;padding:10px 12px;background:rgba(124,92,252,0.08);border-radius:8px;font-size:0.72rem;color:var(--muted);line-height:1.6;text-align:left;">
+        🛡️ Password, JSONBin Key, dan Telegram Token semuanya tersimpan aman di <b style="color:var(--text);">Cloudflare Worker</b> — tidak ada di file HTML ini sama sekali.
+      </div>
     </div>
     <div id="adminEditorBox" style="display:none;background:var(--surface);border-radius:18px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -2391,24 +2397,22 @@
   //  4. Ganti dua nilai di bawah ini, lalu upload ulang SEKALI
   //  5. Setelah itu edit berita kapan saja langsung dari web!
   //
-  const JSONBIN_ID  = '6a36c099da38895dfee36fd5';
-  const JSONBIN_KEY = '$2a$10$gli6hqJIc0dCDs5s0vBTBuh/drrq7RPx4SQRa8cjRyq/Nntlh3tsi';   // Access Key (read-only) — dipakai untuk TAMPILKAN popup
-  const JSONBIN_MASTER_KEY = '$2a$10$x0Htrrp0A2saMdZIklxrV.gsIep2bRScCw08EvfYAZMOW1xbFzG9G';   // Master Key — dipakai HANYA di panel admin (?manage) untuk SIMPAN data
-  const ADMIN_PASS  = 'ganti-password-ini-123';     // ← WAJIB ganti sebelum publish
-  //
+  // ╔══════════════════════════════════════════════════════════════╗
+  // ║  SATU-SATUNYA YANG PERLU DIISI DI SINI                      ║
   // ╠══════════════════════════════════════════════════════════════╣
-  // ║   KONFIGURASI NOTIFIKASI TELEGRAM (OPSIONAL)                ║
-  // ╠══════════════════════════════════════════════════════════════╣
-  //  Cara setup:
-  //  1. Chat @BotFather di Telegram → /newbot → salin TOKEN
-  //  2. Chat bot kamu, lalu buka: https://api.telegram.org/bot<TOKEN>/getUpdates
-  //     Salin "id" dari bagian "chat" — itu CHAT_ID admin kamu
-  //  3. Isi TOKEN dan CHAT_ID di bawah ini, lalu upload ulang
+  //  Setelah deploy worker.js ke Cloudflare, salin URL Worker-nya.
+  //  Contoh: 'https://motionstore.workers.dev'
   //
-  const TELEGRAM_BOT_TOKEN = '8419390326:AAFyTsqPWX0I4c7YtSUiuT8wUX_qLAqrADU';
-  const TELEGRAM_CHAT_ID   = '6739584794';
-  //
+  //  Semua credential (JSONBin key, Telegram token, password admin)
+  //  HANYA ada di Cloudflare Worker — tidak ada di file ini sama sekali.
   // ╚══════════════════════════════════════════════════════════════╝
+  const WORKER_URL = 'GANTI_DENGAN_URL_WORKER_KAMU'; // ← isi setelah deploy Worker
+
+  // Variabel runtime — diisi otomatis saat admin login, tidak pernah ada di kode
+  let _adminSessionToken = '';
+
+  // JSONBIN_URL masih dipakai untuk baca publik via Worker
+  const JSONBIN_URL = WORKER_URL + '/data';
 
   // ---- Order modal: state ----
   const ADMIN_WA = '6285796640135';
@@ -2879,19 +2883,15 @@
   //  Dikirim di background saat pembeli klik "Saya Sudah Bayar"
   // ════════════════════════════════════════════════
   async function sendTelegramNotif(pesanTelegram){
-    if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'ISI_TOKEN_BOT_KAMU') return;
-    if (!TELEGRAM_CHAT_ID   || TELEGRAM_CHAT_ID   === 'ISI_CHAT_ID_ADMIN')  return;
+    if (WORKER_URL === 'GANTI_DENGAN_URL_WORKER_KAMU') return;
     try {
-      await fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
+      // Kirim lewat Worker — Token Telegram tidak pernah ada di browser
+      await fetch(WORKER_URL + '/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: pesanTelegram,
-          parse_mode: 'Markdown'
-        })
+        body: JSON.stringify({ pesan: pesanTelegram })
       });
-    } catch(e) { /* Gagal kirim Telegram — tidak mengganggu alur pembeli */ }
+    } catch(e) { /* Gagal kirim — tidak mengganggu alur pembeli */ }
   }
 
   function confirmPaid(){
@@ -3368,13 +3368,11 @@
 
   // Fetch data dari JSONBin dan tampilkan feed kalau ada item
   async function initAnn(){
-    if (JSONBIN_ID === 'ISI_BIN_ID_KAMU_DI_SINI') return;
+    if (WORKER_URL === 'GANTI_DENGAN_URL_WORKER_KAMU') return; // belum dikonfigurasi
     try {
-      const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Access-Key': JSONBIN_KEY }
-      });
-      const json = await res.json();
-      const parsed = parseBinRecord(json.record);
+      const res = await fetch(WORKER_URL + '/data');
+      const record = await res.json();
+      const parsed = parseBinRecord(record);
       if (parsed.main) renderPublicMainCard(parsed.main);
       renderPublicExtraProducts(parsed.extra);
       applySmmBannerIcon(parsed.smmBannerIcon);
@@ -3742,10 +3740,31 @@
     document.getElementById('adminEditorBox').style.display = 'none';
   }
 
-  function adminLogin(){
-    const pass = document.getElementById('adminPassInput').value;
-    if (pass !== ADMIN_PASS) {
-      document.getElementById('adminLoginErr').textContent = 'Password salah!';
+  async function adminLogin(){
+    const passInput = document.getElementById('adminMasterKeyInput').value.trim();
+    if (!passInput) {
+      document.getElementById('adminLoginErr').textContent = 'Masukkan password admin dulu ya';
+      return;
+    }
+    if (WORKER_URL === 'GANTI_DENGAN_URL_WORKER_KAMU') {
+      document.getElementById('adminLoginErr').textContent = 'WORKER_URL belum diisi di kode!';
+      return;
+    }
+    document.getElementById('adminLoginErr').textContent = 'Memverifikasi...';
+    try {
+      const res = await fetch(WORKER_URL + '/admin/login', {
+        method: 'POST',
+        headers: { 'X-Admin-Password': passInput }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        document.getElementById('adminLoginErr').textContent = data.error || 'Password salah!';
+        return;
+      }
+      // Simpan session token — hanya ada di memori browser, habis saat tab ditutup
+      _adminSessionToken = data.token;
+    } catch(e) {
+      document.getElementById('adminLoginErr').textContent = 'Gagal terhubung ke Worker, coba lagi';
       return;
     }
     adminAuthed = true;
@@ -3755,21 +3774,11 @@
   }
 
   async function loadAdminData(){
-    if (JSONBIN_ID === 'ISI_BIN_ID_KAMU_DI_SINI') {
-      annItems = [];
-      prodExtra = [];
-      renderAdItems();
-      renderMainCardEditor();
-      renderExtraProductsAdmin();
-      renderAdSmmBannerField();
-      return;
-    }
     try {
-      const res = await fetch(JSONBIN_URL + '/latest', {
-        headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-      });
-      const json = await res.json();
-      const parsed = parseBinRecord(json.record);
+      const res = await fetch(WORKER_URL + '/data');
+      if (!res.ok) throw new Error('Gagal ambil data');
+      const record = await res.json();
+      const parsed = parseBinRecord(record);
       annItems = parsed.announcements;
       prodMain = parsed.main || prodMain;
       prodExtra = parsed.extra;
@@ -3780,6 +3789,7 @@
     renderMainCardEditor();
     renderExtraProductsAdmin();
     renderAdSmmBannerField();
+    if (typeof renderAdPromoTab === 'function') renderAdPromoTab();
   }
 
   function renderAdSmmBannerField(){
@@ -4198,30 +4208,47 @@
   }
 
   async function saveAdminData(){
-    if (!adminAuthed) return;
+    if (!adminAuthed || !_adminSessionToken) return;
     const saveBtn = document.getElementById('adSaveBtn');
     saveBtn.textContent = 'Menyimpan...';
     saveBtn.disabled = true;
 
-    if (JSONBIN_ID === 'ISI_BIN_ID_KAMU_DI_SINI') {
-      saveBtn.textContent = '⚠️ JSONBin belum dikonfigurasi';
-      saveBtn.disabled = false;
-      return;
-    }
-
     try {
-      await fetch(JSONBIN_URL, {
-        method: 'PUT',
+      const res = await fetch(WORKER_URL + '/admin/save', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_MASTER_KEY,
+          'Content-Type'    : 'application/json',
+          'X-Admin-Password': _adminSessionToken, // pakai session token, bukan password asli
         },
-        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon, promo: currentAdminPromo })
+        body: JSON.stringify({
+          announcements: annItems,
+          main: prodMain,
+          extra: prodExtra,
+          smmBannerIcon: smmBannerIcon,
+          promo: currentAdminPromo
+        })
       });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        // Kalau token expired, minta login ulang
+        if (res.status === 401) {
+          saveBtn.textContent = '⚠️ Sesi habis, login ulang';
+          saveBtn.disabled = false;
+          adminAuthed = false;
+          _adminSessionToken = '';
+          setTimeout(()=>{
+            document.getElementById('adminEditorBox').style.display = 'none';
+            document.getElementById('adminLoginBox').style.display = 'block';
+            document.getElementById('adminLoginErr').textContent = 'Sesi habis (8 jam), silakan login ulang';
+          }, 1500);
+          return;
+        }
+        throw new Error(data.error || 'Gagal simpan');
+      }
       saveBtn.textContent = '✅ Tersimpan!';
       setTimeout(()=>{ saveBtn.textContent = 'Simpan Perubahan'; saveBtn.disabled = false; }, 2000);
     } catch(e) {
-      saveBtn.textContent = '❌ Gagal simpan';
+      saveBtn.textContent = '❌ Gagal simpan: ' + e.message;
       saveBtn.disabled = false;
     }
   }
