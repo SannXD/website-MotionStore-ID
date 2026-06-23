@@ -2145,7 +2145,7 @@
         <div class="ap-type-row">
           <div class="ap-type-left">
             <div class="ap-type-dot"></div>
-            <span class="ap-type-name">📩 Email dari Seller</span>
+            <span class="ap-type-name" id="accpick-seller-nama">📩 Email dari Seller</span>
             <!-- Badge di bawah ini bisa diganti, misal: "Hemat", "Populer", "Tersedia" -->
             <span class="ap-type-tag">Hemat</span>
           </div>
@@ -2167,7 +2167,7 @@
         <div class="ap-type-row">
           <div class="ap-type-left">
             <div class="ap-type-dot"></div>
-            <span class="ap-type-name">🔑 Email dari Buyer</span>
+            <span class="ap-type-name" id="accpick-buyer-nama">🔑 Email dari Buyer</span>
             <!-- Badge pink = status khusus (misal "Tutup Sementara", "Segera Hadir", "Terbatas") -->
             <span class="ap-type-tag pink">Tutup Sementara</span>
           </div>
@@ -2213,6 +2213,49 @@
         <div class="price-period" id="pdPeriod">/ sekali bayar</div>
       </div>
       <button class="buy-btn" id="pdBuyBtn" style="margin-bottom:16px;">Beli Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTRA PRODUK: BOTTOM SHEET PILIH OPSI HARGA -->
+<div class="accpick-overlay" id="extraOpsiOverlay" style="display:none;">
+  <div class="accpick-sheet" id="extraOpsiSheet">
+    <div class="ap-handle"></div>
+    <div class="ap-header">
+      <div class="ap-app-icon" id="extraOpsiProdIcon" style="background:var(--card);border:1px solid var(--border);font-size:1.3rem;"></div>
+      <div class="ap-prod-info">
+        <div class="ap-prod-name" id="extraOpsiProdName">Nama Produk</div>
+        <div class="ap-prod-meta" id="extraOpsiProdMeta"></div>
+      </div>
+      <button class="ap-close" onclick="closeExtraOpsiPick()">&#x2715;</button>
+    </div>
+    <div class="ap-section-label">Pilih Tipe</div>
+    <div class="ap-types" style="padding-bottom:6px;">
+      <div class="ap-type sel" id="extraOpsiA" onclick="pickExtraOpsi('a')">
+        <div class="ap-type-row">
+          <div class="ap-type-left">
+            <div class="ap-type-dot"></div>
+            <span class="ap-type-name" id="extraOpsiANama">Opsi A</span>
+          </div>
+          <div class="ap-type-price" id="extraOpsiAHarga">Rp0</div>
+        </div>
+      </div>
+      <div class="ap-type" id="extraOpsiB" onclick="pickExtraOpsi('b')">
+        <div class="ap-type-row">
+          <div class="ap-type-left">
+            <div class="ap-type-dot"></div>
+            <span class="ap-type-name" id="extraOpsiBNama">Opsi B</span>
+          </div>
+          <div class="ap-type-price" id="extraOpsiBHarga">Rp0</div>
+        </div>
+      </div>
+    </div>
+    <div class="ap-bottom">
+      <div class="ap-bottom-price">
+        <div class="ap-bottom-label">Harga</div>
+        <div class="ap-bottom-val" id="extraOpsiBottomPrice">Rp0</div>
+      </div>
+      <button class="ap-buy-btn" onclick="confirmExtraOpsiPick()">&#x1F6D2; Beli Sekarang</button>
     </div>
   </div>
 </div>
@@ -2440,7 +2483,7 @@
   // ════════════════════════════════════════
   let selectedAccType = 'seller';
   let accTypePrice = { seller: 2000, buyer: 4000 }; // ← nilai default; akan otomatis diganti oleh harga dari Panel Admin (?manage) saat data berhasil dimuat
-  const accTypeName  = { seller: 'Email dari Seller', buyer: 'Email dari Buyer' }; // ← ganti nama di sini
+  let accTypeName  = { seller: 'Email dari Seller', buyer: 'Email dari Buyer' }; // ← diupdate otomatis dari Panel Admin
 
   // Ambil harga "Email dari Seller" & "Email dari Buyer" yang disimpan lewat Panel Admin (?manage),
   // lalu perbarui semua tempat di halaman yang menampilkan harga tersebut.
@@ -2463,6 +2506,16 @@
         }
       });
     });
+
+    // Sync nama opsi dari admin
+    if (main.accSellerName && main.accSellerName.trim()) accTypeName.seller = main.accSellerName.trim();
+    if (main.accBuyerName && main.accBuyerName.trim()) accTypeName.buyer = main.accBuyerName.trim();
+
+    // Update label nama di popup "Pilih Paket" (accpick)
+    const sellerNamaEl = document.getElementById('accpick-seller-nama');
+    if (sellerNamaEl) sellerNamaEl.textContent = accTypeName.seller;
+    const buyerNamaEl = document.getElementById('accpick-buyer-nama');
+    if (buyerNamaEl) buyerNamaEl.textContent = accTypeName.buyer;
 
     // Update teks harga di popup "Pilih Paket" (accpick)
     const sellerPriceEl = document.querySelector('#accpick-seller .ap-type-price');
@@ -3452,7 +3505,7 @@
       iconHtml: imgEl ? '<img src="' + imgEl.src + '" style="width:100%;height:100%;object-fit:contain;">' : '📦',
       title: document.getElementById('amCardTitle').textContent,
       sub: document.getElementById('amCardSub').textContent,
-      desc: '',
+      desc: prodMain.deskripsi || '',
       features: fitur,
       price: document.getElementById('amCardPrice').textContent,
       period: document.getElementById('amCardPricePeriod').textContent,
@@ -3469,6 +3522,9 @@
     const hargaNumber = parseHargaNumber(p.harga);
     const labelProduk = p.nama || 'Produk';
     const { isHabis } = getStokInfo(p);
+    // Cek apakah produk ini punya opsi harga A/B
+    const hasOpsi = (p.opsiANama && p.opsiAHarga !== '' && p.opsiAHarga !== undefined) ||
+                    (p.opsiBNama && p.opsiBHarga !== '' && p.opsiBHarga !== undefined);
     openProductDetail({
       iconHtml: renderProdIcon(p.icon, 64),
       title: p.nama || 'Nama Produk',
@@ -3480,11 +3536,115 @@
       buyText: isHabis ? 'Stok Habis' : (p.teksTombol || 'Beli Sekarang'),
       disabled: isHabis,
       onBuy: function(){
-        if (p.link) window.open(p.link, '_blank');
-        else openOrderModal(labelProduk, hargaNumber, 'extra');
+        if (p.link) { window.open(p.link, '_blank'); return; }
+        if (hasOpsi) {
+          // Buka bottom sheet pilih opsi khusus produk ini
+          openExtraOpsiPick(idx);
+        } else {
+          openOrderModal(labelProduk, hargaNumber, 'extra');
+        }
       }
     });
   }
+
+  // ── Bottom sheet pilih opsi harga untuk produk tambahan ──
+  let extraOpsiPickIdx = null;
+  let extraOpsiPickSelected = 'a';
+
+  function openExtraOpsiPick(idx){
+    extraOpsiPickIdx = idx;
+    extraOpsiPickSelected = 'a';
+    const p = publicExtraProducts[idx];
+    if (!p) return;
+
+    // Isi konten sheet
+    const sheet = document.getElementById('extraOpsiSheet');
+    const nameEl = document.getElementById('extraOpsiProdName');
+    const metaEl = document.getElementById('extraOpsiProdMeta');
+    const iconEl = document.getElementById('extraOpsiProdIcon');
+    if (nameEl) nameEl.textContent = p.nama || 'Produk';
+    if (metaEl) metaEl.textContent = (p.sub || '');
+    if (iconEl) iconEl.innerHTML = renderProdIcon(p.icon, 36);
+
+    const opsiAEl = document.getElementById('extraOpsiA');
+    const opsiBEl = document.getElementById('extraOpsiB');
+    const opsiANama = document.getElementById('extraOpsiANama');
+    const opsiBNama = document.getElementById('extraOpsiBNama');
+    const opsiAHarga = document.getElementById('extraOpsiAHarga');
+    const opsiBHarga = document.getElementById('extraOpsiBHarga');
+
+    const hasA = p.opsiANama && p.opsiAHarga !== '' && p.opsiAHarga !== undefined;
+    const hasB = p.opsiBNama && p.opsiBHarga !== '' && p.opsiBHarga !== undefined;
+
+    if (opsiAEl) opsiAEl.style.display = hasA ? 'block' : 'none';
+    if (opsiBEl) opsiBEl.style.display = hasB ? 'block' : 'none';
+    if (opsiANama) opsiANama.textContent = p.opsiANama || 'Opsi A';
+    if (opsiBNama) opsiBNama.textContent = p.opsiBNama || 'Opsi B';
+    if (opsiAHarga) opsiAHarga.textContent = 'Rp' + Number(p.opsiAHarga).toLocaleString('id-ID');
+    if (opsiBHarga) opsiBHarga.textContent = 'Rp' + Number(p.opsiBHarga).toLocaleString('id-ID');
+
+    // Default pilih opsi pertama yang tersedia
+    extraOpsiPickSelected = hasA ? 'a' : 'b';
+    _renderExtraOpsiPick();
+
+    const overlay = document.getElementById('extraOpsiOverlay');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ overlay.classList.add('open'); }); });
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeExtraOpsiPick(){
+    const overlay = document.getElementById('extraOpsiOverlay');
+    overlay.classList.add('closing');
+    overlay.classList.remove('open');
+    const sheet = overlay.querySelector('.accpick-sheet');
+    sheet.addEventListener('transitionend', function handler(){
+      overlay.classList.remove('closing');
+      overlay.style.display = 'none';
+      sheet.removeEventListener('transitionend', handler);
+    }, {once:true});
+    document.body.style.overflow = '';
+  }
+
+  function pickExtraOpsi(opsi){
+    extraOpsiPickSelected = opsi;
+    _renderExtraOpsiPick();
+  }
+
+  function _renderExtraOpsiPick(){
+    const p = publicExtraProducts[extraOpsiPickIdx];
+    if (!p) return;
+    document.getElementById('extraOpsiA').classList.toggle('sel', extraOpsiPickSelected === 'a');
+    document.getElementById('extraOpsiB').classList.toggle('sel', extraOpsiPickSelected === 'b');
+    const price = extraOpsiPickSelected === 'a' ? Number(p.opsiAHarga) : Number(p.opsiBHarga);
+    const el = document.getElementById('extraOpsiBottomPrice');
+    if (el) el.textContent = 'Rp' + price.toLocaleString('id-ID');
+  }
+
+  function confirmExtraOpsiPick(){
+    const p = publicExtraProducts[extraOpsiPickIdx];
+    if (!p) return;
+    const isA = extraOpsiPickSelected === 'a';
+    const opsiNama = isA ? (p.opsiANama || 'Opsi A') : (p.opsiBNama || 'Opsi B');
+    const opsiHarga = isA ? Number(p.opsiAHarga) : Number(p.opsiBHarga);
+    const labelProduk = (p.nama || 'Produk') + ' · ' + opsiNama;
+
+    const overlay = document.getElementById('extraOpsiOverlay');
+    overlay.classList.add('closing');
+    overlay.classList.remove('open');
+    const sheet = overlay.querySelector('.accpick-sheet');
+    sheet.addEventListener('transitionend', function handler(){
+      overlay.classList.remove('closing');
+      overlay.style.display = 'none';
+      sheet.removeEventListener('transitionend', handler);
+      openOrderModal(labelProduk, opsiHarga, 'extra');
+    }, {once:true});
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('extraOpsiOverlay').addEventListener('click', function(e){
+    if (e.target === this) closeExtraOpsiPick();
+  });
 
   function tampilAnnFeed(items){
     const idGabungan = items.map(it => it.id).join(',');
@@ -3637,6 +3797,12 @@
         <textarea rows="5" oninput="adUpdateMain('fitur',this.value)"
           style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;resize:vertical;box-sizing:border-box;">${escHtml(prodMain.fitur||'')}</textarea>
       </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Deskripsi lengkap</label>
+        <textarea rows="3" oninput="adUpdateMain('deskripsi',this.value)" placeholder="Deskripsi lengkap produk..."
+          style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;resize:vertical;box-sizing:border-box;">${escHtml(prodMain.deskripsi||'')}
+        </textarea>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
           <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Harga</label>
@@ -3651,19 +3817,31 @@
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="font-size:0.8rem;font-weight:700;color:#a78bfa;margin-bottom:10px;">💰 Harga Pilihan Tipe Akun</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
           <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">📩 Email dari Seller (Rp)</label>
-            <input type="number" min="0" value="${escAttr(prodMain.accSellerPrice!==undefined&&prodMain.accSellerPrice!==null?prodMain.accSellerPrice:2000)}" oninput="adUpdateMain('accSellerPrice',this.value)"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Nama Opsi A</label>
+            <input type="text" value="${escAttr(prodMain.accSellerName||'Email dari Seller')}" oninput="adUpdateMain('accSellerName',this.value)" placeholder="cth: Email dari Seller"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">🔑 Email dari Buyer (Rp)</label>
-            <input type="number" min="0" value="${escAttr(prodMain.accBuyerPrice!==undefined&&prodMain.accBuyerPrice!==null?prodMain.accBuyerPrice:4000)}" oninput="adUpdateMain('accBuyerPrice',this.value)"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
+            <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Harga Opsi A (Rp)</label>
+            <input type="number" min="0" value="${escAttr(prodMain.accSellerPrice!==undefined&&prodMain.accSellerPrice!==null?prodMain.accSellerPrice:2000)}" oninput="adUpdateMain('accSellerPrice',this.value)"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
           </div>
         </div>
-        <div style="font-size:0.68rem;color:var(--muted);margin-top:6px;line-height:1.5;">Ini harga yang muncul di popup "Pilih Paket" saat pembeli klik Beli Sekarang. Isi angka saja tanpa "Rp" atau titik.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Nama Opsi B</label>
+            <input type="text" value="${escAttr(prodMain.accBuyerName||'Email dari Buyer')}" oninput="adUpdateMain('accBuyerName',this.value)" placeholder="cth: Email dari Buyer"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Harga Opsi B (Rp)</label>
+            <input type="number" min="0" value="${escAttr(prodMain.accBuyerPrice!==undefined&&prodMain.accBuyerPrice!==null?prodMain.accBuyerPrice:4000)}" oninput="adUpdateMain('accBuyerPrice',this.value)"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:6px;line-height:1.5;">Nama & harga muncul di popup "Pilih Paket" saat pembeli klik Beli Sekarang. Isi harga angka saja tanpa "Rp" atau titik.</div>
       </div>
       <div style="margin-top:10px;">
         <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Stok (kosongkan = tidak dibatasi, isi 0 = tampil "Stok Habis")</label>
@@ -3749,6 +3927,34 @@
               style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;font-family:inherit;box-sizing:border-box;">
           </div>
         </div>
+        <div style="margin-top:2px;margin-bottom:10px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
+          <div style="font-size:0.78rem;font-weight:700;color:#a78bfa;margin-bottom:8px;">💰 Harga Pilihan Tipe (opsional)</div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-bottom:10px;line-height:1.5;">Kalau diisi, pembeli akan pilih tipe dulu sebelum checkout. Kosongkan keduanya kalau produk ini tidak perlu pilihan tipe.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div>
+              <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Nama Opsi A</label>
+              <input type="text" value="${escAttr(p.opsiANama||'')}" oninput="adUpdateProduct(${idx},'opsiANama',this.value)" placeholder="cth: Seller"
+                style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Harga Opsi A (Rp)</label>
+              <input type="number" min="0" value="${escAttr(p.opsiAHarga!==undefined&&p.opsiAHarga!==null&&p.opsiAHarga!==''?p.opsiAHarga:'')}" oninput="adUpdateProduct(${idx},'opsiAHarga',this.value)" placeholder="cth: 5000"
+                style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Nama Opsi B</label>
+              <input type="text" value="${escAttr(p.opsiBNama||'')}" oninput="adUpdateProduct(${idx},'opsiBNama',this.value)" placeholder="cth: Buyer"
+                style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:3px;">Harga Opsi B (Rp)</label>
+              <input type="number" min="0" value="${escAttr(p.opsiBHarga!==undefined&&p.opsiBHarga!==null&&p.opsiBHarga!==''?p.opsiBHarga:'')}" oninput="adUpdateProduct(${idx},'opsiBHarga',this.value)" placeholder="cth: 8000"
+                style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:0.82rem;font-family:inherit;box-sizing:border-box;">
+            </div>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
             <label style="font-size:0.76rem;color:var(--muted);display:block;margin-bottom:4px;">Teks Tombol</label>
@@ -3813,7 +4019,11 @@
       periode: '/ sekali bayar',
       teksTombol: 'Beli Sekarang',
       link: '',
-      stok: ''
+      stok: '',
+      opsiANama: '',
+      opsiAHarga: '',
+      opsiBNama: '',
+      opsiBHarga: ''
     });
     renderExtraProductsAdmin();
     const list = document.getElementById('adExtraList');
