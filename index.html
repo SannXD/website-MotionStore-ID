@@ -891,11 +891,12 @@
   }
   .repeat-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-  .success-wrap { padding:32px 24px; text-align:center; }
-  .success-icon { font-size:4rem; margin-bottom:12px; display:block; animation:successBounce 0.6s cubic-bezier(.34,1.56,.64,1); }
+  .success-wrap { padding:32px 24px; text-align:left; }
+  .success-icon { font-size:4rem; margin-bottom:12px; display:block; animation:successBounce 0.6s cubic-bezier(.34,1.56,.64,1); text-align:center; }
   @keyframes successBounce { from{transform:scale(0) rotate(-10deg)} to{transform:scale(1) rotate(0)} }
-  .success-wrap h3 { font-family:'Sora',sans-serif; font-size:1.3rem; font-weight:800; color:var(--success); margin-bottom:10px; }
-  .success-wrap p { color:var(--muted); font-size:0.88rem; line-height:1.7; margin-bottom:20px; }
+  .success-wrap h3 { font-family:'Sora',sans-serif; font-size:1.3rem; font-weight:800; color:var(--success); margin-bottom:10px; text-align:center; }
+  .success-wrap p { color:var(--muted); font-size:0.88rem; line-height:1.7; margin-bottom:20px; text-align:left; }
+  .success-wrap p[id] { text-align:left; }
   .wa-btn {
     display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#fff;
     border:none; padding:12px 24px; border-radius:10px; font-size:0.9rem;
@@ -2389,10 +2390,10 @@
     <div id="orderStep3" style="display:none;">
       <button class="modal-close-x" onclick="closeOrderModal()" aria-label="Tutup">✕</button>
       <div class="success-wrap">
-        <span class="success-icon">🎉</span>
-        <h3>Satu Langkah Lagi</h3>
-        <p>Kirim konfirmasi pembayaranmu ke admin lewat WhatsApp. Akun akan diaktifkan begitu pembayaran diverifikasi.</p>
-        <p style="font-size:0.85rem;color:#ffb84d;background:rgba(255,184,77,0.1);border:1px solid rgba(255,184,77,0.3);border-radius:10px;padding:10px 12px;margin:10px 0;">📸 <b>Penting:</b> setelah chat terbuka, lampirkan juga screenshot bukti transfer/QRIS kamu ya — proses verifikasi jadi lebih cepat.</p>
+        <span class="success-icon" id="step3Icon">🎉</span>
+        <h3 id="step3Title">Satu Langkah Lagi</h3>
+        <p id="step3Desc">Kirim konfirmasi pembayaranmu ke admin lewat WhatsApp. Akun akan diaktifkan begitu pembayaran diverifikasi.</p>
+        <p id="step3Note" style="font-size:0.85rem;color:#ffb84d;background:rgba(255,184,77,0.1);border:1px solid rgba(255,184,77,0.3);border-radius:10px;padding:10px 12px;margin:10px 0;text-align:left;">📸 <b>Penting:</b> setelah chat terbuka, lampirkan juga screenshot bukti transfer/QRIS kamu ya — proses verifikasi jadi lebih cepat.</p>
         <a class="wa-btn" id="waConfirmBtn" href="#" target="_blank">💬 Konfirmasi via WhatsApp</a>
         <button class="close-modal-btn" onclick="closeOrderModal()">Tutup</button>
       </div>
@@ -2628,6 +2629,20 @@
     document.getElementById('orderStep1').style.display = n===1 ? 'block' : 'none';
     document.getElementById('orderStep2').style.display = n===2 ? 'block' : 'none';
     document.getElementById('orderStep3').style.display = n===3 ? 'block' : 'none';
+    if (n === 3) {
+      const isSmm = currentOrder.type === 'smm';
+      document.getElementById('step3Icon').textContent   = isSmm ? '🚀' : '🎉';
+      document.getElementById('step3Title').textContent  = isSmm ? 'Pesanan Dikirim!' : 'Satu Langkah Lagi';
+      document.getElementById('step3Desc').textContent   = isSmm
+        ? 'Detail pesanan sudah siap dikirim ke admin via WhatsApp. Pesanan akan diproses setelah admin menerima konfirmasi.'
+        : 'Kirim konfirmasi pembayaranmu ke admin lewat WhatsApp. Akun akan diaktifkan begitu pembayaran diverifikasi.';
+      const noteStyle = 'font-size:0.85rem;color:#ffb84d;background:rgba(255,184,77,0.1);border:1px solid rgba(255,184,77,0.3);border-radius:10px;padding:10px 12px;margin:10px 0;text-align:left;';
+      document.getElementById('step3Note').setAttribute('style', noteStyle);
+      document.getElementById('step3Note').innerHTML = isSmm
+        ? '📸 <b>Penting:</b> setelah chat terbuka, lampirkan juga screenshot bukti transfer/QRIS kamu ya supaya pesanan langsung diproses.'
+        : '📸 <b>Penting:</b> setelah chat terbuka, lampirkan juga screenshot bukti transfer/QRIS kamu ya — proses verifikasi jadi lebih cepat.';
+      document.getElementById('waConfirmBtn').textContent = isSmm ? '💬 Kirim Pesanan via WhatsApp' : '💬 Konfirmasi via WhatsApp';
+    }
   }
 
   // ── State kode promo yang sedang aktif ──
