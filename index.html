@@ -3772,11 +3772,6 @@
     errEl.textContent = 'Gagal konek ke server';
   }
 }
-    adminAuthed = true;
-    document.getElementById('adminLoginBox').style.display = 'none';
-    document.getElementById('adminEditorBox').style.display = 'block';
-    loadAdminData();
-  }
 
   async function loadAdminData(){
     if (JSONBIN_ID === 'ISI_BIN_ID_KAMU_DI_SINI') {
