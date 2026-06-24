@@ -3747,12 +3747,31 @@
     document.getElementById('adminEditorBox').style.display = 'none';
   }
 
-  function adminLogin(){
-    const pass = document.getElementById('adminPassInput').value;
-    if (pass !== ADMIN_PASS) {
-      document.getElementById('adminLoginErr').textContent = 'Password salah!';
+  async function adminLogin(){
+  const passInput = document.getElementById('adminPassInput');
+  const errEl = document.getElementById('adminLoginErr');
+  const pass = passInput.value;
+  if (!pass) { errEl.textContent = 'Isi password dulu'; return; }
+  errEl.textContent = 'Memverifikasi...';
+  try {
+    const res = await fetch('/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': pass }
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      errEl.textContent = data.error || 'Password salah!';
+      passInput.value = '';
       return;
     }
+    adminAuthed = true;
+    document.getElementById('adminLoginBox').style.display = 'none';
+    document.getElementById('adminEditorBox').style.display = 'block';
+    loadAdminData();
+  } catch(e) {
+    errEl.textContent = 'Gagal konek ke server';
+  }
+}
     adminAuthed = true;
     document.getElementById('adminLoginBox').style.display = 'none';
     document.getElementById('adminEditorBox').style.display = 'block';
