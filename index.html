@@ -3917,7 +3917,7 @@
           </div>
           <div>
             <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Markup / 1000 (Rp)</label>
-            <input type="number" min="0" value="${lay.markup??2000}" oninput="adSmmUpdateLay(${pi},${li},'markup',+this.value); adSmmRefreshJual(${pi},${li})"
+            <input type="number" min="0" value="${lay.markup||0}" oninput="adSmmUpdateLay(${pi},${li},'markup',+this.value); adSmmRefreshJual(${pi},${li})"
               style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
           </div>
         </div>
@@ -4557,7 +4557,11 @@
   }
 
   function getSmmHargaJual(lay){
-    return (lay.hargaModal||0) + (lay.markup??2000);
+    // Data lama pakai hargaPer1000, data baru pakai hargaModal + markup
+    if (lay.hargaModal != null || lay.markup != null) {
+      return (lay.hargaModal||0) + (lay.markup||0);
+    }
+    return (lay.hargaPer1000||0);
   }
 
   function calcSmmLineTotal(lay, qty){
