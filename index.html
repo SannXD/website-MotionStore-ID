@@ -4557,10 +4557,9 @@
   }
 
   function getSmmHargaJual(lay){
-    // Data lama pakai hargaPer1000, data baru pakai hargaModal + markup
-    if (lay.hargaModal != null || lay.markup != null) {
-      return (lay.hargaModal||0) + (lay.markup||0);
-    }
+    // Kalau ada hargaModal (angka bulat per 1000), pakai itu + markup
+    if (lay.hargaModal > 0) return (lay.hargaModal||0) + (lay.markup||0);
+    // Fallback ke hargaPer1000 untuk data lama
     return (lay.hargaPer1000||0);
   }
 
