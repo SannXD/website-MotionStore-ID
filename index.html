@@ -2002,6 +2002,10 @@
           style="flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">
           🎟️ Kode Promo
         </button>
+        <button type="button" id="adTabBtnSmm" onclick="adSwitchTab('smm')"
+          style="flex:1;background:var(--card);color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">
+          🚀 Suntik Sosmed
+        </button>
       </div>
 
       <!-- TAB: PENGUMUMAN -->
@@ -2085,6 +2089,16 @@
 
           <div id="adPromoPreview" style="font-size:0.76rem;color:var(--muted);padding:10px;background:var(--surface);border-radius:8px;line-height:1.7;"></div>
         </div>
+      </div>
+
+      <!-- TAB: SUNTIK SOSMED -->
+      <div id="adTabSmm" style="display:none;">
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Kelola platform & layanan yang muncul di halaman Suntik Sosmed.</div>
+        <div id="adSmmPlatformList"><!-- di-generate JS --></div>
+        <button onclick="adSmmAddPlatform()" type="button"
+          style="width:100%;background:var(--card);border:1.5px dashed var(--border);color:#a78bfa;padding:12px;border-radius:12px;font-family:'Sora',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;margin-bottom:18px;">
+          + Tambah Platform Baru
+        </button>
       </div>
 
       <button id="adSaveBtn" onclick="saveAdminData()"
@@ -3826,14 +3840,153 @@
 
   // Pindah tab antara Pengumuman & Produk di panel admin
   function adSwitchTab(tab){
-    ['Ann','Prod','Promo'].forEach(t => {
+    ['Ann','Prod','Promo','Smm'].forEach(t => {
       const isActive = tab === t.toLowerCase();
-      document.getElementById('adTab'+t).style.display = isActive ? 'block' : 'none';
-      document.getElementById('adTabBtn'+t).style.background = isActive ? 'linear-gradient(135deg,#7c5cfc,#fc5ca0)' : 'var(--card)';
-      document.getElementById('adTabBtn'+t).style.color = isActive ? '#fff' : 'var(--muted)';
-      document.getElementById('adTabBtn'+t).style.border = isActive ? 'none' : '1px solid var(--border)';
+      const tabEl = document.getElementById('adTab'+t);
+      const btnEl = document.getElementById('adTabBtn'+t);
+      if (tabEl) tabEl.style.display = isActive ? 'block' : 'none';
+      if (btnEl) {
+        btnEl.style.background = isActive ? 'linear-gradient(135deg,#7c5cfc,#fc5ca0)' : 'var(--card)';
+        btnEl.style.color = isActive ? '#fff' : 'var(--muted)';
+        btnEl.style.border = isActive ? 'none' : '1px solid var(--border)';
+      }
     });
     if (tab === 'promo') renderAdPromoTab();
+    if (tab === 'smm') renderAdSmmEditor();
+  }
+
+  // ════════════ ADMIN SMM EDITOR ════════════
+
+  function renderAdSmmEditor(){
+    const wrap = document.getElementById('adSmmPlatformList');
+    if (!wrap) return;
+    if (!smmPlatforms.length){
+      wrap.innerHTML = '<div style="font-size:0.82rem;color:var(--muted);text-align:center;padding:18px 0;">Belum ada platform. Klik "+ Tambah Platform Baru" di bawah.</div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    smmPlatforms.forEach((plat, pi) => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px;';
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <input type="text" value="${escAttr(plat.icon||'')}" placeholder="Emoji/ikon" oninput="adSmmUpdatePlat(${pi},'icon',this.value)"
+            style="width:56px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 8px;border-radius:8px;font-size:1rem;font-family:inherit;text-align:center;">
+          <input type="text" value="${escAttr(plat.nama||'')}" placeholder="Nama platform (Instagram, TikTok...)" oninput="adSmmUpdatePlat(${pi},'nama',this.value)"
+            style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:0.88rem;font-family:inherit;">
+          <button onclick="adSmmDeletePlat(${pi})" type="button" title="Hapus platform"
+            style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:7px 11px;border-radius:8px;cursor:pointer;font-size:0.85rem;">🗑️</button>
+        </div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;font-weight:700;letter-spacing:0.5px;">LAYANAN</div>
+        <div id="adSmmLayList_${pi}"></div>
+        <button onclick="adSmmAddLayanan(${pi})" type="button"
+          style="width:100%;background:transparent;border:1px dashed rgba(124,92,252,0.35);color:#a78bfa;padding:8px;border-radius:8px;font-size:0.8rem;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;margin-top:4px;">
+          + Tambah Layanan
+        </button>
+      `;
+      wrap.appendChild(card);
+      renderAdSmmLayananList(pi);
+    });
+  }
+
+  function renderAdSmmLayananList(pi){
+    const wrap = document.getElementById('adSmmLayList_' + pi);
+    if (!wrap) return;
+    const plat = smmPlatforms[pi];
+    if (!plat || !plat.layanan || !plat.layanan.length){
+      wrap.innerHTML = '<div style="font-size:0.78rem;color:var(--muted);padding:6px 0 8px;">Belum ada layanan.</div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    plat.layanan.forEach((lay, li) => {
+      const hargaJual = (lay.hargaModal||0) + (lay.markup||2000);
+      const row = document.createElement('div');
+      row.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;';
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
+          <input type="text" value="${escAttr(lay.nama||'')}" placeholder="Nama layanan" oninput="adSmmUpdateLay(${pi},${li},'nama',this.value)"
+            style="flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+          <button onclick="adSmmDeleteLay(${pi},${li})" type="button"
+            style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#ef4444;padding:5px 9px;border-radius:7px;cursor:pointer;font-size:0.8rem;">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px;">
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Harga Modal / 1000 (Rp)</label>
+            <input type="number" min="0" value="${lay.hargaModal||0}" oninput="adSmmUpdateLay(${pi},${li},'hargaModal',+this.value); adSmmRefreshJual(${pi},${li})"
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+          </div>
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Markup / 1000 (Rp)</label>
+            <input type="number" min="0" value="${lay.markup??2000}" oninput="adSmmUpdateLay(${pi},${li},'markup',+this.value); adSmmRefreshJual(${pi},${li})"
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+          </div>
+        </div>
+        <div id="adSmmJualPreview_${pi}_${li}" style="font-size:0.76rem;font-weight:700;color:#22c55e;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:7px;padding:6px 10px;margin-bottom:7px;">
+          💰 Harga jual ke user: Rp${hargaJual.toLocaleString('id-ID')} / 1.000
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px;">
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Min. Qty</label>
+            <input type="number" min="1" value="${lay.minQty||10}" oninput="adSmmUpdateLay(${pi},${li},'minQty',+this.value)"
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+          </div>
+          <div>
+            <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Max. Qty</label>
+            <input type="number" min="1" value="${lay.maxQty||1000000}" oninput="adSmmUpdateLay(${pi},${li},'maxQty',+this.value)"
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+          </div>
+        </div>
+        <div style="margin-bottom:6px;">
+          <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Deskripsi (opsional)</label>
+          <input type="text" value="${escAttr(lay.deskripsi||'')}" placeholder="Contoh: Garansi refill 30 hari" oninput="adSmmUpdateLay(${pi},${li},'deskripsi',this.value)"
+            style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+        </div>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:0.78rem;color:var(--muted);">
+          <input type="checkbox" ${lay.butuhCatatan?'checked':''} onchange="adSmmUpdateLay(${pi},${li},'butuhCatatan',this.checked)"
+            style="accent-color:var(--accent);width:15px;height:15px;">
+          Wajib isi catatan (target/komentar/dll)
+        </label>
+      `;
+      wrap.appendChild(row);
+    });
+  }
+
+  function adSmmUpdatePlat(pi, field, val){
+    if (!smmPlatforms[pi]) return;
+    smmPlatforms[pi][field] = val;
+  }
+  function adSmmUpdateLay(pi, li, field, val){
+    if (!smmPlatforms[pi] || !smmPlatforms[pi].layanan[li]) return;
+    smmPlatforms[pi].layanan[li][field] = val;
+  }
+  function adSmmRefreshJual(pi, li){
+    const lay = smmPlatforms[pi] && smmPlatforms[pi].layanan[li];
+    if (!lay) return;
+    const el = document.getElementById('adSmmJualPreview_' + pi + '_' + li);
+    if (!el) return;
+    const hargaJual = (lay.hargaModal||0) + (lay.markup??2000);
+    el.textContent = '💰 Harga jual ke user: Rp' + hargaJual.toLocaleString('id-ID') + ' / 1.000';
+  }
+  function adSmmDeletePlat(pi){
+    if (!confirm('Hapus platform ini beserta semua layananannya?')) return;
+    smmPlatforms.splice(pi, 1);
+    renderAdSmmEditor();
+  }
+  function adSmmDeleteLay(pi, li){
+    smmPlatforms[pi].layanan.splice(li, 1);
+    renderAdSmmLayananList(pi);
+  }
+  function adSmmAddPlatform(){
+    smmPlatforms.push({ id: 'plat_' + Date.now(), nama: '', icon: '', layanan: [] });
+    renderAdSmmEditor();
+    // scroll ke bawah supaya platform baru kelihatan
+    const wrap = document.getElementById('adSmmPlatformList');
+    if (wrap) wrap.lastElementChild && wrap.lastElementChild.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+  function adSmmAddLayanan(pi){
+    if (!smmPlatforms[pi]) return;
+    smmPlatforms[pi].layanan.push({ id: 'lay_' + Date.now(), nama: '', deskripsi: '', hargaModal: 0, markup: 2000, minQty: 10, maxQty: 1000000, butuhCatatan: false });
+    renderAdSmmLayananList(pi);
   }
 
   // Render editor kartu utama (Alight Motion) di panel admin
@@ -4235,7 +4388,7 @@
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_MASTER_KEY,
         },
-        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon, promo: currentAdminPromo })
+        body: JSON.stringify({ announcements: annItems, main: prodMain, extra: prodExtra, smmBannerIcon: smmBannerIcon, promo: currentAdminPromo, smm: smmPlatforms })
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       // ── Setelah simpan berhasil, langsung perbarui tampilan publik di halaman ──
@@ -4243,6 +4396,7 @@
       renderPublicExtraProducts(prodExtra);
       applySmmBannerIcon(smmBannerIcon);
       applyPromoFromAdmin(currentAdminPromo);
+      renderSmmStorefront();
       saveBtn.textContent = '✅ Tersimpan!';
       setTimeout(()=>{ saveBtn.textContent = 'Simpan Perubahan'; saveBtn.disabled = false; }, 2000);
     } catch(e) {
@@ -4338,7 +4492,7 @@
             <div class="smm-service-info">
               <h4>${escHtml(lay.nama || 'Layanan')}</h4>
               ${lay.deskripsi ? `<p class="smm-service-desc">${escHtml(lay.deskripsi)}</p>` : ''}
-              <p class="smm-service-unit-price">Rp${(lay.hargaPer1000||0).toLocaleString('id-ID')} / 1000</p>
+              <p class="smm-service-unit-price">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1.000 &nbsp;·&nbsp; Min ${(lay.minQty||10).toLocaleString('id-ID')}${lay.maxQty ? ' · Max ' + lay.maxQty.toLocaleString('id-ID') : ''}</p>
             </div>
             <div class="smm-service-right">
               <button class="smm-buy-btn" onclick="openSmmOrderModal('${plat.id}')">Pesan</button>
@@ -4371,7 +4525,7 @@
     wrap.innerHTML = '';
     if (!smmModalPlatform || !smmModalPlatform.layanan) return;
     smmModalPlatform.layanan.forEach(lay => {
-      smmModalSelections[lay.id] = smmModalSelections[lay.id] || { checked:false, qty: lay.minQty || 1000, note:'' };
+      smmModalSelections[lay.id] = smmModalSelections[lay.id] || { checked:false, qty: lay.minQty || 10, note:'' };
       const sel = smmModalSelections[lay.id];
       const item = document.createElement('div');
       item.className = 'smm-check-item' + (sel.checked ? ' checked' : '');
@@ -4381,14 +4535,15 @@
           <input type="checkbox" ${sel.checked?'checked':''} onchange="toggleSmmService('${lay.id}', this.checked)">
           <div style="flex:1;">
             <div class="smm-check-name">${escHtml(lay.nama || 'Layanan')}</div>
-            <div class="smm-check-price">Rp${(lay.hargaPer1000||0).toLocaleString('id-ID')} / 1000${lay.deskripsi ? ' · ' + escHtml(lay.deskripsi) : ''}</div>
+            <div class="smm-check-price">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1000${lay.deskripsi ? ' · ' + escHtml(lay.deskripsi) : ''}</div>
           </div>
         </label>
         <div class="smm-check-body">
           <div class="smm-qty-row">
-            <label>Jumlah</label>
-            <input type="number" min="${lay.minQty||1}" step="1" value="${sel.qty}" oninput="updateSmmQty('${lay.id}', this.value)">
+            <label>Jumlah <span style="color:var(--muted);font-size:0.7rem;">(min ${(lay.minQty||10).toLocaleString('id-ID')}${lay.maxQty ? ' · max ' + lay.maxQty.toLocaleString('id-ID') : ''})</span></label>
+            <input type="number" min="${lay.minQty||10}" max="${lay.maxQty||1000000}" step="1" value="${sel.qty}" oninput="updateSmmQty('${lay.id}', this.value, ${lay.minQty||10}, ${lay.maxQty||1000000})">
           </div>
+          <div style="font-size:0.7rem;color:var(--muted);text-align:right;margin-bottom:4px;">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1.000</div>
           <div class="smm-line-total" id="smmLineTotal_${lay.id}">Rp${calcSmmLineTotal(lay, sel.qty).toLocaleString('id-ID')}</div>
           ${lay.butuhCatatan ? `
           <div class="smm-check-note-wrap">
@@ -4401,9 +4556,13 @@
     });
   }
 
+  function getSmmHargaJual(lay){
+    return (lay.hargaModal||0) + (lay.markup??2000);
+  }
+
   function calcSmmLineTotal(lay, qty){
     const q = Math.max(0, parseInt(qty, 10) || 0);
-    return Math.round((lay.hargaPer1000||0) * (q/1000));
+    return Math.round(getSmmHargaJual(lay) * (q/1000));
   }
 
   function toggleSmmService(layId, checked){
@@ -4413,12 +4572,26 @@
     if (item) item.classList.toggle('checked', checked);
     updateSmmModalTotal();
   }
-  function updateSmmQty(layId, val){
+  function updateSmmQty(layId, val, minQty, maxQty){
     if (!smmModalSelections[layId]) return;
-    smmModalSelections[layId].qty = val;
+    let q = parseInt(val, 10) || 0;
+    const min = minQty || 10;
+    const max = maxQty || 1000000;
+    smmModalSelections[layId].qty = q;
     const lay = smmModalPlatform.layanan.find(l=>l.id===layId);
     const lineEl = document.getElementById('smmLineTotal_' + layId);
-    if (lineEl && lay) lineEl.textContent = 'Rp' + calcSmmLineTotal(lay, val).toLocaleString('id-ID');
+    if (lineEl && lay) {
+      if (q < min) {
+        lineEl.textContent = `⚠️ Min ${min.toLocaleString('id-ID')}`;
+        lineEl.style.color = 'var(--danger)';
+      } else if (q > max) {
+        lineEl.textContent = `⚠️ Max ${max.toLocaleString('id-ID')}`;
+        lineEl.style.color = 'var(--danger)';
+      } else {
+        lineEl.textContent = 'Rp' + calcSmmLineTotal(lay, q).toLocaleString('id-ID');
+        lineEl.style.color = 'var(--accent)';
+      }
+    }
     updateSmmModalTotal();
   }
   function updateSmmNote(layId, val){
@@ -4445,6 +4618,21 @@
 
     const chosen = smmModalPlatform.layanan.filter(lay => smmModalSelections[lay.id] && smmModalSelections[lay.id].checked);
     if (!chosen.length) { alert('Pilih minimal 1 layanan dulu ya'); return; }
+
+    // Validasi minQty & maxQty
+    for (const lay of chosen) {
+      const q = parseInt(smmModalSelections[lay.id].qty, 10) || 0;
+      const min = lay.minQty || 10;
+      const max = lay.maxQty || 1000000;
+      if (q < min) {
+        alert('Layanan "' + lay.nama + '" minimal ' + min.toLocaleString('id-ID') + ' qty ya');
+        return;
+      }
+      if (q > max) {
+        alert('Layanan "' + lay.nama + '" maksimal ' + max.toLocaleString('id-ID') + ' qty ya');
+        return;
+      }
+    }
 
     // Validasi catatan wajib utk layanan yang butuh catatan
     for (const lay of chosen) {
