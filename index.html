@@ -3937,9 +3937,9 @@
           </div>
         </div>
         <div style="margin-bottom:6px;">
-          <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Deskripsi (opsional)</label>
-          <input type="text" value="${escAttr(lay.deskripsi||'')}" placeholder="Contoh: Garansi refill 30 hari" oninput="adSmmUpdateLay(${pi},${li},'deskripsi',this.value)"
-            style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;">
+          <label style="font-size:0.7rem;color:var(--muted);display:block;margin-bottom:3px;">Deskripsi (opsional, Enter = baris baru)</label>
+          <textarea rows="4" placeholder="Contoh: No Refill&#10;Catatan:&#10;• Pastikan target sudah benar" oninput="adSmmUpdateLay(${pi},${li},'deskripsi',this.value)"
+            style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:7px;font-size:0.84rem;font-family:inherit;resize:vertical;line-height:1.5;">${escHtml(lay.deskripsi||'')}</textarea>
         </div>
         <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:0.78rem;color:var(--muted);">
           <input type="checkbox" ${lay.butuhCatatan?'checked':''} onchange="adSmmUpdateLay(${pi},${li},'butuhCatatan',this.checked)"
@@ -4491,7 +4491,7 @@
           card.innerHTML = `
             <div class="smm-service-info">
               <h4>${escHtml(lay.nama || 'Layanan')}</h4>
-              ${lay.deskripsi ? `<p class="smm-service-desc">${escHtml(lay.deskripsi)}</p>` : ''}
+              ${lay.deskripsi ? `<p class="smm-service-desc" style="white-space:pre-line;">${escHtml(lay.deskripsi)}</p>` : ''}
               <p class="smm-service-unit-price">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1.000 &nbsp;·&nbsp; Min ${(lay.minQty||10).toLocaleString('id-ID')}${lay.maxQty ? ' · Max ' + lay.maxQty.toLocaleString('id-ID') : ''}</p>
             </div>
             <div class="smm-service-right">
@@ -4535,7 +4535,7 @@
           <input type="checkbox" ${sel.checked?'checked':''} onchange="toggleSmmService('${lay.id}', this.checked)">
           <div style="flex:1;">
             <div class="smm-check-name">${escHtml(lay.nama || 'Layanan')}</div>
-            <div class="smm-check-price">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1000${lay.deskripsi ? ' · ' + escHtml(lay.deskripsi) : ''}</div>
+            <div class="smm-check-price">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1000${lay.deskripsi ? '<br><span style="white-space:pre-line;">' + escHtml(lay.deskripsi) + '</span>' : ''}</div>
           </div>
         </label>
         <div class="smm-check-body">
