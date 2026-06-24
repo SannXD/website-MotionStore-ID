@@ -2912,49 +2912,80 @@
     const name = document.getElementById('custName').value.trim();
     const wa = document.getElementById('custWA').value.trim();
     const garis = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
-    let pesan =
-      'Halo Admin MotionStore ID 👋\n\n' +
-      '*KONFIRMASI PEMBAYARAN*\n' +
-      garis + '\n' +
-      '🛍️ Produk   : ' + currentOrder.label + '\n' +
-      '💰 Total    : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
-      '👤 Nama     : ' + name + '\n' +
-      '📱 WhatsApp : ' + wa;
-    if (currentOrder.type === 'smm' && currentOrder.target) {
-      pesan += '\n🎯 Target   : ' + currentOrder.target;
+    let pesan;
+    if (currentOrder.type === 'smm') {
+      pesan =
+        'Halo Admin MotionStore ID 👋\n\n' +
+        '🚀 *PESANAN SUNTIK SOSMED*\n' +
+        garis + '\n' +
+        '📱 Platform  : ' + currentOrder.label.split('—')[0].trim() + '\n' +
+        '🎯 Target    : ' + (currentOrder.target || '-') + '\n' +
+        garis + '\n' +
+        '📋 *Rincian Layanan:*\n' +
+        (currentOrder.smmDetail || '-') + '\n' +
+        garis + '\n' +
+        '💰 Total     : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
+        '👤 Nama      : ' + name + '\n' +
+        '📱 WhatsApp  : ' + wa;
+      if (activePromo) {
+        pesan += '\n🎟️ Promo      : ' + activePromo.kode + ' (-Rp' + activePromo.diskon.toLocaleString('id-ID') + ')';
+      }
+      pesan += '\n' + garis + '\n\nMohon segera diproses ya, terima kasih 🙏';
+    } else {
+      pesan =
+        'Halo Admin MotionStore ID 👋\n\n' +
+        '*KONFIRMASI PEMBAYARAN*\n' +
+        garis + '\n' +
+        '🛍️ Produk   : ' + currentOrder.label + '\n' +
+        '💰 Total    : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
+        '👤 Nama     : ' + name + '\n' +
+        '📱 WhatsApp : ' + wa;
+      if (currentOrder.type === 'am' && currentOrder.buyerEmail) {
+        pesan += '\n📧 Email    : ' + currentOrder.buyerEmail;
+      }
+      if (activePromo) {
+        pesan += '\n🎟️ Promo     : ' + activePromo.kode + ' (-Rp' + activePromo.diskon.toLocaleString('id-ID') + ')';
+      }
+      pesan += '\n' + garis;
+      pesan += '\n\nMohon dicek dan diaktifkan ya, terima kasih 🙏';
     }
-    if (currentOrder.type === 'am' && currentOrder.buyerEmail) {
-      pesan += '\n📧 Email    : ' + currentOrder.buyerEmail;
-    }
-    if (activePromo) {
-      pesan += '\n🎟️ Promo     : ' + activePromo.kode + ' (-Rp' + activePromo.diskon.toLocaleString('id-ID') + ')';
-    }
-    pesan += '\n' + garis;
-
-    pesan += '\n\nMohon dicek dan diaktifkan ya, terima kasih 🙏';
 
     // ── Kirim notifikasi ke Telegram admin secara otomatis (background) ──
     const tgl = new Date().toLocaleString('id-ID', {
       day:'2-digit', month:'short', year:'numeric',
       hour:'2-digit', minute:'2-digit', second:'2-digit'
     });
-    let notifTelegram =
-      '🔔 *PESANAN MASUK — MotionStore ID*\n' +
-      '━━━━━━━━━━━━━━━━━━━━\n' +
-      '🛍️ *Produk*   : ' + currentOrder.label + '\n' +
-      '💰 *Total*    : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
-      '👤 *Nama*     : ' + name + '\n' +
-      '📱 *WA*       : ' + wa;
-    if (currentOrder.type === 'smm' && currentOrder.target) {
-      notifTelegram += '\n🎯 *Target*   : ' + currentOrder.target;
+    let notifTelegram;
+    if (currentOrder.type === 'smm') {
+      notifTelegram =
+        '🔔 *PESANAN SUNTIK SOSMED — MotionStore ID*\n' +
+        '━━━━━━━━━━━━━━━━━━━━\n' +
+        '📱 *Platform* : ' + currentOrder.label.split('—')[0].trim() + '\n' +
+        '🎯 *Target*   : ' + (currentOrder.target || '-') + '\n' +
+        '📋 *Layanan*  :\n' + (currentOrder.smmDetail || '-') + '\n' +
+        '━━━━━━━━━━━━━━━━━━━━\n' +
+        '💰 *Total*    : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
+        '👤 *Nama*     : ' + name + '\n' +
+        '📱 *WA*       : ' + wa + '\n' +
+        '🕐 *Waktu*    : ' + tgl + '\n' +
+        '━━━━━━━━━━━━━━━━━━━━\n' +
+        '⚠️ _Segera proses pesanan SMM ini!_';
+    } else {
+      notifTelegram =
+        '🔔 *PESANAN MASUK — MotionStore ID*\n' +
+        '━━━━━━━━━━━━━━━━━━━━\n' +
+        '🛍️ *Produk*   : ' + currentOrder.label + '\n' +
+        '💰 *Total*    : Rp' + uniqueNominal.toLocaleString('id-ID') + '\n' +
+        '👤 *Nama*     : ' + name + '\n' +
+        '📱 *WA*       : ' + wa;
+      if (currentOrder.type === 'am' && currentOrder.buyerEmail) {
+        notifTelegram += '\n📧 *Email*    : ' + currentOrder.buyerEmail;
+      }
+      notifTelegram +=
+        '\n🕐 *Waktu*    : ' + tgl +
+        '\n━━━━━━━━━━━━━━━━━━━━\n' +
+        '⚠️ _Segera cek bukti transfer dari pembeli via WA!_';
     }
-    if (currentOrder.type === 'am' && currentOrder.buyerEmail) {
-      notifTelegram += '\n📧 *Email*    : ' + currentOrder.buyerEmail;
-    }
-    notifTelegram +=
-      '\n🕐 *Waktu*    : ' + tgl +
-      '\n━━━━━━━━━━━━━━━━━━━━\n' +
-      '⚠️ _Segera cek bukti transfer dari pembeli via WA!_';
     sendTelegramNotif(notifTelegram);
 
     const waLink = 'https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(pesan);
