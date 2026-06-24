@@ -656,6 +656,14 @@
   .smm-service-info h4 { font-family:'Sora',sans-serif; font-size:0.92rem; font-weight:700; color:var(--text); margin-bottom:4px; }
   .smm-service-info p { font-size:0.76rem; color:var(--muted); line-height:1.4; }
   .smm-service-desc { font-size:0.76rem; color:var(--muted); line-height:1.4; margin-bottom:4px; }
+  .smm-desc-short { white-space:pre-line; }
+  .smm-desc-full { white-space:pre-line; display:none; }
+  .smm-desc-toggle {
+    font-size:0.74rem; color:var(--accent); cursor:pointer;
+    background:none; border:none; padding:0; font-family:inherit;
+    font-weight:600; margin-top:2px; display:inline-block;
+  }
+  .smm-desc-toggle:hover { opacity:0.8; }
   .smm-service-unit-price { font-size:0.78rem; color:var(--accent); font-weight:700; }
   .smm-service-price { font-family:'Sora',sans-serif; font-weight:800; color:var(--accent); font-size:0.95rem; white-space:nowrap; margin-bottom:6px; text-align:right; }
   .smm-service-right { display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0; }
@@ -4483,6 +4491,29 @@
   let smmModalPlatform = null;
   let smmModalSelections = {}; // { layananId: { checked, qty, note } }
 
+  function buildSmmDesc(deskripsi, layId){
+    const lines = deskripsi.split('\n');
+    const previewLines = lines.slice(0, 5).join('\n');
+    const hasMore = lines.length > 5;
+    if (!hasMore) return `<span class="smm-desc-short">${escHtml(deskripsi)}</span>`;
+    return `
+      <span class="smm-desc-short" id="smmDescShort_${layId}">${escHtml(previewLines)}...</span>
+      <span class="smm-desc-full" id="smmDescFull_${layId}">${escHtml(deskripsi)}</span>
+      <button class="smm-desc-toggle" id="smmDescBtn_${layId}" onclick="toggleSmmDesc('${layId}')">Lihat selengkapnya ▾</button>
+    `;
+  }
+
+  function toggleSmmDesc(layId){
+    const short = document.getElementById('smmDescShort_' + layId);
+    const full  = document.getElementById('smmDescFull_'  + layId);
+    const btn   = document.getElementById('smmDescBtn_'   + layId);
+    if (!short || !full || !btn) return;
+    const expanded = full.style.display === 'inline';
+    short.style.display = expanded ? 'inline' : 'none';
+    full.style.display  = expanded ? 'none'   : 'inline';
+    btn.textContent     = expanded ? 'Lihat selengkapnya ▾' : 'Sembunyikan ▴';
+  }
+
   function renderSmmStorefront(){
     const tabsWrap = document.getElementById('smmPlatformTabs');
     const groupsWrap = document.getElementById('smmPlatformGroups');
@@ -4522,7 +4553,7 @@
           card.innerHTML = `
             <div class="smm-service-info">
               <h4>${escHtml(lay.nama || 'Layanan')}</h4>
-              ${lay.deskripsi ? `<p class="smm-service-desc" style="white-space:pre-line;">${escHtml(lay.deskripsi)}</p>` : ''}
+              ${lay.deskripsi ? `<div class="smm-service-desc">${buildSmmDesc(lay.deskripsi, lay.id)}</div>` : ''}
               <p class="smm-service-unit-price">Rp${getSmmHargaJual(lay).toLocaleString('id-ID')} / 1.000 &nbsp;·&nbsp; Min ${(lay.minQty||10).toLocaleString('id-ID')}${lay.maxQty ? ' · Max ' + lay.maxQty.toLocaleString('id-ID') : ''}</p>
             </div>
             <div class="smm-service-right">
